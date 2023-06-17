@@ -1,0 +1,110 @@
+{% extends "common.html" %}
+{% block content %}
+
+<script src="/static/node_modules/gridstack/dist/gridstack-all.js"></script>
+<link href="/static/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet"/>
+
+<style type="text/css">
+.grid-stack {
+    padding: 7 0 10 10;height: 100%;
+    display: flex; flex-flow: column; height: calc(100vh - 80px)
+ }
+.grid-stack-item-content { 
+    border-radius: 12px;;
+}
+
+.grid-stack-item-content { 
+    padding: 0;
+}
+
+.grid-stack-item-selected {
+    border: 2px solid;
+    border-radius: 12px;;
+}
+
+.gridcard-header {
+    cursor: move;
+    width: 100%;
+    padding: 1 10 1 10;
+    bbackground-color: rgba(0,0,0,.09);
+}
+.gridcard-header:hover {
+    background-color: rgba(0,0,0,.09);
+}
+.gridcard-headertitle {
+    font-size: medium; 
+    font-weight: bold;
+}
+
+
+.gridcard {
+    text-align: left;
+    padding: 0 2 0 2;
+    flex-grow: 1; 
+    height: 90%;
+}
+.gridcard0 {
+    text-align: left;
+}
+
+.dropdown-item {
+    font-size: small;
+}
+
+ 
+
+.btn100{
+    width: 100%;
+    font-size: medium;
+    font-weight: 600;
+    text-align: center;
+}
+
+.input1{
+    width: 100%;
+    text-align: left;
+    height: 45px;
+    padding: 3 0 3 3;
+    font-size: small;
+    background: #fefefe;
+}
+.input1:disabled{
+    background: rgb(170, 170, 170);
+}
+
+.label1{
+    margin: 0;
+    font-size: smaller;
+    position: relative;
+    top: 12;
+    background: #ffffff;
+    padding: 2 10 2 10;
+    left: 10;
+    border-radius: 4px;;
+}
+
+.configure {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 100;
+    border: 2px solid;;
+}
+</style>
+
+<section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
+{% include "dash/top.html" %}
+<h1> Dashboard from everywhere</h1>
+<img src="https://grafana.com/media/grafana/images/grafana-dashboard-english.png?w=1040&h=584" style="width: 80%;">
+</section>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<script>
+
+$(document).ready(function() {
+})
+</script>
+
+{% endblock %}

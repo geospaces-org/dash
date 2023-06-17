@@ -1,0 +1,294 @@
+{% extends "common.html" %}
+{% block content %}
+
+<style type="text/css">
+.grid-stack {
+    padding: 7 0 10 10;height: 100%;
+    display: flex; flex-flow: column; height: calc(100vh - 80px)
+ }
+.grid-stack-item-content { 
+    border-radius: 12px;;
+}
+
+.grid-stack-item-content { 
+    padding: 0;
+}
+
+.grid-stack-item-selected {
+    border: 2px solid;
+    border-radius: 12px;;
+}
+
+.gridcard-header {
+    cursor: move;
+    width: 100%;
+    padding: 1 10 1 10;
+    bbackground-color: rgba(0,0,0,.09);
+}
+.gridcard-header:hover {
+    background-color: rgba(0,0,0,.09);
+}
+.gridcard-headertitle {
+    font-size: medium; 
+    font-weight: bold;
+}
+
+
+.gridcard {
+    text-align: left;
+    padding: 0 2 0 2;
+    flex-grow: 1; 
+    width: 100%;
+    height: 89%;
+}
+
+.stlviewer {
+    width: 100%;
+    height: 89%;
+}
+
+.gridcard0 {
+    text-align: left;
+}
+
+.dropdown-item {
+    font-size: small;
+}
+
+ 
+
+.btn100{
+    width: 100%;
+    font-size: medium;
+    font-weight: 600;
+    text-align: center;
+}
+
+
+
+</style>
+
+
+<script src="/static/node_modules/gridstack/dist/gridstack-all.js"></script>
+<link href="/static/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet"/>
+
+<script src="/static/stlviewer/three.js/build/three.min.js"></script>
+<script src="/static/stlviewer/three.js/examples/js/WebGL.js"></script>
+<script src="/static/stlviewer/three.js/examples/js/loaders/STLLoader.js"></script>
+<script src="/static/stlviewer/three.js/examples/js/controls/OrbitControls.js"></script>
+<script src="/static/stlviewer/js/stlviewer.js"></script>
+
+{% include "dash/configure.html" %}
+
+<section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
+{% include "dash/top.html" %}
+
+<hr/>
+<div class="grid-stack">
+    <div class="grid-stack-item" gs-w="6" gs-h="5">
+        <div class="grid-stack-item-content">
+        <div class="gridcard-header"> 
+            <span class="gridcard-headertitle"></span><b>Title</b>
+            <span style="float: right;"> 
+                <div class="dropdown">
+                    <a href="#" style="color: #000000; text-decoration: none;" data-toggle="dropdown"> 
+                        ...
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="#">Edit</a>
+                        <a class="dropdown-item" onclick='removeWidget(this)' >Remove</a>
+                        <a class="dropdown-item" href="#">Refresh</a>
+                        <a class="dropdown-item" href="#">Save</a>
+                    </div>
+                </div>
+        </div>
+
+        <div class="gridcard">
+            <iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1686965478121&to=1686972688226&theme=light&panelId=2" width="100%" height="200" frameborder="0"></iframe>
+        </div>
+    </div></div>
+
+</div>
+</section>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<script>
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+var grid_options = {
+    wwidth: 10,
+    hheight: 34,
+    cellHeight: '70px',
+    cellWidth: '20px',
+    verticalMargin: 2,
+    horizontalMargin: 0.0,
+    left: 0,
+    resizable: {
+      //handles: 'e, se, s, sw, w'
+      handles: 'e, se, s, ssw, w'
+    },
+    handle: '.gridcard-header'
+};
+var GRID = GridStack.init(grid_options);
+var ACTIVE_GRID_ITEM = null
+
+if (!grid_options.handle){
+    GRID.enableMove(false, true);
+    console.log('ENABLE_MOVE')
+}
+document.onmousedown = function (e) {
+    if ( GRID === undefined)    return;
+    if (! grid_options.handle){
+        (e.altKey) ? GRID.enableMove(true, true) : GRID.enableMove(false, true);
+        console.log('grid_options.handle', e.altKey )
+    }
+};
+
+
+GRID_TEMPLATE=`
+<div class="grid-stack-item-content">
+<div class="gridcard-header" onclick="selectPanel(this)"> 
+    <span id=paneltitle class="gridcard-headertitle">Title</span>
+    <span style="float: right;"> 
+        <div class="dropdown">
+            <a href="#" style="color: #000000; text-decoration: none;" data-toggle="dropdown"> 
+                ...
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item" href="#">Edit</a>
+                <a class="dropdown-item" onclick='removeWidget(this)' >Remove</a>
+                <a class="dropdown-item" href="#">Refresh</a>
+                <a class="dropdown-item" href="#">Save</a>
+            </div>
+        </div>
+</div>
+
+<div class="gridcard" >
+    CONTENTS
+</div>
+`
+
+var last=0
+function addWidget(x=last++*3, y=0, w=6, h=4, title="", content="") {
+    var html = GRID_TEMPLATE;
+    html=html.replace('Title', title || "Panel "+last);
+    
+    if  (content)
+        html=html.replace('CONTENTS', content);
+    else
+        html=html.replace('CONTENTS', frames[last%frames.length]);
+
+
+    GRID.addWidget( {x:x, y:y, w:w, h:h, content: html} ) 
+    selectPanel()
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function selectPanel(ele) {
+    if (ACTIVE_GRID_ITEM)
+        ACTIVE_GRID_ITEM.classList.remove('grid-stack-item-selected')
+        
+
+    if ( !ele )
+        ACTIVE_GRID_ITEM = GRID.getGridItems().pop()
+    else {
+        ele = getParentGridItem(ele)
+        if ( ele == ACTIVE_GRID_ITEM) 
+            ACTIVE_GRID_ITEM = null
+        else
+            ACTIVE_GRID_ITEM = ele
+    }
+    if ( ACTIVE_GRID_ITEM)
+        ACTIVE_GRID_ITEM.classList.add('grid-stack-item-selected')
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function getParentGridItem(ele, depth=25) {
+    i = 0
+    while (i++ < depth && !ele.classList.contains('grid-stack-item') ) {
+        ele = ele.parentNode
+    }
+
+    if(ele.classList.contains('grid-stack-item'))
+        return ele
+    console.log('Could not find grid-stack-item')
+}
+
+var STLDIV=`
+<p id="boundingbox" style="margin-top:0; margin-bottom:0;float: left; border: 1px solid #ccc;"></p>
+    <p id="mousepos"    style="margin-top:0; margin-bottom:0; float: right;"></p>
+    <div class="stlviewer" id="stlviewer" data-src="/static/stlviewer/stls/hook.stl">
+    </div>
+`
+function showSTL(con, stlfile) {
+    if (!con) {
+        var ele = (ele) ? getParentGridItem(ele) : ACTIVE_GRID_ITEM
+        var con = $(ele).find(".gridcard")
+    }
+    if (!stlfile) {
+        var stlfile = $("#stl").val()
+    }
+
+    console.log('showSTL', con, stlfile)
+    $(con).html(STLDIV)
+    $("#stlviewer").attr("data-src", stlfile)
+    STLViewerEnable("stlviewer", true);
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function updatePanel(ele) {
+    ele = (ele) ? getParentGridItem(ele) : ACTIVE_GRID_ITEM
+    console.log('updatePanel', ele)
+
+    if ( !ele ) return;
+
+    var url = $("#url")
+    var emb = $("#emb")
+    var stl = $("#stl")
+    var dat = $("#datasrc")
+
+    $(ele).find("#paneltitle").html( $("#title").val() )
+
+    var con = $(ele).find(".gridcard")
+    if ( url.val() ) {
+        var val = `<iframe src="${url.val()}" width="100%" height="100%" frameborder="0"></iframe>`
+        con.html(val)
+    }
+    else if ( emb.val() ) {
+        con.html(emb.val())
+    }
+    else if ( stl.val(con) ) {
+        showSTL(con, stl.val())
+    }
+    else if ( dat.val() ) {
+        showData(stl.val())
+    }
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function removeWidget(ele) {
+    ele = getParentGridItem(ele)
+    if ( ele )
+        GRID.removeWidget(ele)
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+var items = [
+    {h: 4, w:7, content: '<button onClick="GRID.removeWidget(this.parentNode.parentNode)">X</button><br>'},
+    {h: 3, w:2, content: 'another longer widget!'} // will be placed next at (1,0) and 2x1
+];
+
+frames=[
+'<iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1686965478121&to=1686972688226&panelId=3" width="100%" height="100%" frameborder="0"></iframe>',
+'<iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1686965478121&to=1686972688226&theme=light&panelId=1" width="100%" height="100%" frameborder="0"></iframe>',
+'<iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1626195600000&to=1626258600000&panelId=6" width="100%" height="100%" frameborder="0"></iframe>',
+'<iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1626195600000&to=1626258600000&panelId=5" width="100%" height="100%" frameborder="0"></iframe>',    
+
+]
+//GRID.load(items);
+
+window.onload=function() {
+} 
+
+$(document).ready(function() {
+    addWidget()
+    selectPanel()
+})
+</script>
+
+
+{% endblock %}

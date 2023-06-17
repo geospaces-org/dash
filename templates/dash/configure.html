@@ -1,0 +1,64 @@
+<style>
+.configure {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 50%;
+    min-height:50%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 100;
+    border: 2px solid;
+}
+
+.c100 {
+    width: 100%;
+    padding: 15px;
+}
+</style>
+
+<div id="configure" class="configure" style="display: none1;">
+    <div id="tabs" class=tabs>
+        <ul>
+            <li><a href="#tabs1" >General </a></li>
+            <li><a href="#tabs2" >Data Plot </a></li>
+            <li><a href="#tabs3" >Maps</a></li>
+        </ul>
+        <div id="tabs1" >
+
+        <label class=label1 > Title</label>
+        <input class="input1" id="title"  data-toggle="tooltip"  title="Title for the panel" placeholder="Title" value="_._">
+
+
+        <label class=label1 > URL and external link </label>
+        <input class="input1" id="url"  data-toggle="tooltip" title="Extrenal URL"  placeholder="URL or Leave blank" value="">
+
+        <label class=label1 >Embedding</label>
+        <textarea class="c100" rows=5 id="emb"  data-toggle="tooltip" title="Embed URL"  placeholder="URL or Leave blank" >
+        <iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1686965478121&to=1686972688226&panelId=3" width="100%" height="100%" frameborder="0"></iframe>
+        </textarea>
+
+        <label class=label1 >STL Source</label>
+        <input class="input1" id="stl"  data-toggle="tooltip" title="STL File"  placeholder="STL File or Leave blank" value="/static/stlviewer/stls/hook.stl">
+        </div>
+        <div id="tabs2" >
+
+    <input class="input1" id="datdsrc"  data-toggle="tooltip"  placeholder="Data Source" value="default:a2.csv">
+    <input class="input1" id="params"  data-toggle="tooltip"  
+        placeholder="Chart parameters"  value="filter; refresh rate, etc">
+
+        </div>
+        <div id="tabs3" >
+        </div>
+    </div>    
+
+<div style="position: absolute; bottom: 0; width: 100%;">
+    <hr style="height: 5px; background: #010101;" />
+    <button  class="btn btn-primary" type="button" onclick="updatePanel()">Update</button>
+    <button  class="btn btn-primary" type="button" onclick="showSTL()">Update STL</button>
+    <button  class="btn btn-primary" type="button" onclick="showData()">Update Data</button>
+    <button  class="btn btn-primary" type="button" onclick="savePanel()">Save</button>
+    <button  class="btn btn-primary"  onclick="$('#configure').toggle()">Hide</button>
+</div>    
+
+</div>
+
