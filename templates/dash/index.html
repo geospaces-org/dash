@@ -7,7 +7,8 @@
     display: flex; flex-flow: column; height: calc(100vh - 80px)
  }
 .grid-stack-item-content { 
-    border-radius: 12px;;
+    border-radius: 6px;
+    box-shadow: 1px 1px 2px #aaaaaa;
 }
 
 .grid-stack-item-content { 
@@ -40,6 +41,7 @@
     flex-grow: 1; 
     width: 100%;
     height: 89%;
+    overflow: auto;
 }
 
 .stlviewer {
@@ -104,7 +106,6 @@
         </div>
 
         <div class="gridcard">
-            <iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1686965478121&to=1686972688226&theme=light&panelId=2" width="100%" height="200" frameborder="0"></iframe>
         </div>
     </div></div>
 
@@ -143,9 +144,9 @@ document.onmousedown = function (e) {
     }
 };
 
+//<div class="grid-stack-item-content">
 
 GRID_TEMPLATE=`
-<div class="grid-stack-item-content">
 <div class="gridcard-header" onclick="selectPanel(this)"> 
     <span id=paneltitle class="gridcard-headertitle">Title</span>
     <span style="float: right;"> 
@@ -160,6 +161,7 @@ GRID_TEMPLATE=`
                 <a class="dropdown-item" href="#">Save</a>
             </div>
         </div>
+    </span>
 </div>
 
 <div class="gridcard" >
@@ -214,22 +216,23 @@ function getParentGridItem(ele, depth=25) {
 var STLDIV=`
 <p id="boundingbox" style="margin-top:0; margin-bottom:0;float: left; border: 1px solid #ccc;"></p>
     <p id="mousepos"    style="margin-top:0; margin-bottom:0; float: right;"></p>
-    <div class="stlviewer" id="stlviewer" data-src="/static/stlviewer/stls/hook.stl">
+    <div class="stlviewer" data-src="/static/stlviewer/stls/orion_nofbc.stl">
     </div>
 `
 function showSTL(con, stlfile) {
-    if (!con) {
-        var ele = (ele) ? getParentGridItem(ele) : ACTIVE_GRID_ITEM
-        var con = $(ele).find(".gridcard")
-    }
+    con = (con) ? con : $(ACTIVE_GRID_ITEM).find(".gridcard")
     if (!stlfile) {
         var stlfile = $("#stl").val()
     }
 
-    console.log('showSTL', con, stlfile)
-    $(con).html(STLDIV)
-    $("#stlviewer").attr("data-src", stlfile)
-    STLViewerEnable("stlviewer", true);
+    var name = 'stlviewer'
+    console.log('showSTL', con, stlfile, name)
+
+    //$(con).html(STLDIV.replace('stlviewer0', name))
+    $(con).html(STLDIV) 
+    $("."+name).attr("data-src", stlfile)
+
+    STLViewerEnable(name, true);
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function updatePanel(ele) {
@@ -242,8 +245,6 @@ function updatePanel(ele) {
     var emb = $("#emb")
     var stl = $("#stl")
     var dat = $("#datasrc")
-
-    $(ele).find("#paneltitle").html( $("#title").val() )
 
     var con = $(ele).find(".gridcard")
     if ( url.val() ) {
@@ -273,6 +274,7 @@ var items = [
 ];
 
 frames=[
+'<iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1686965478121&to=1686972688226&theme=light&panelId=2" width="100%" height="200" frameborder="0"></iframe>',
 '<iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1686965478121&to=1686972688226&panelId=3" width="100%" height="100%" frameborder="0"></iframe>',
 '<iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1686965478121&to=1686972688226&theme=light&panelId=1" width="100%" height="100%" frameborder="0"></iframe>',
 '<iframe src="http://localhost:3000/d-solo/bc3be350-a106-4db2-a439-60e44a9902ae/testdash?orgId=1&from=1626195600000&to=1626258600000&panelId=6" width="100%" height="100%" frameborder="0"></iframe>',
@@ -289,6 +291,5 @@ $(document).ready(function() {
     selectPanel()
 })
 </script>
-
 
 {% endblock %}
