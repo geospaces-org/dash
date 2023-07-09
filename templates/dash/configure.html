@@ -13,9 +13,18 @@
 .c100 {
     width: 100%;
     padding: 15px;
+    height: auto;
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
      -moz-box-sizing: border-box;    /* Firefox, other Gecko */
      box-sizing: border-box;
+}
+.div1 {
+    display: inline-block;
+}
+.datatable{
+    overflow: auto;
+    height: auto;
+    flex-grow: 1;
 }
 </style>
 
@@ -23,22 +32,24 @@
 <div id="tabs" class=tabs>
 <ul>
     <li><a href="#tabs1" >General</a></li>
-    <li><a href="#tabs3" >HTML</a></li>
     <li><a href="#tabs2" >Contents</a></li>
-    <li><a href="#tabs4" >Data Plot</a></li>
+    <li><a href="#tabs3" >HTML</a></li>
+    <li><a href="#tabs4" >Plots</a></li>
+    <li><a href="#tabs5" >Data</a></li>
 </ul>
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 <div id="tabs1" >
     <label class=label1 >Title</label>
     <input class="input1" id="title"  data-toggle="tooltip"  title="Title for the panel" placeholder="Title" value="_._">
+    <div >
+        <label class=label1 >Parameters</label>
+        <textarea class="input1 c100" style="height:80%" rows=6 id="panelparams"  placeholder="">{
+title: 'Panel Title',
+refresh: '10s', 
+movable: 1
+}</textarea> 
+    </div>
 
-    <label class=label1 >Refresh</label>
-    <input class="input1" id="refresh"  data-toggle="tooltip"  title="" placeholder="none;10s;1m" value="none;10s;1m">
-
-    <label class=label1 >Panel Movable?</label>
-    <input class="input1" id="refresh"  data-toggle="tooltip"  title="" placeholder="1|0" value="1;0">
-
-    <button  class="btn btn-primary" type="button" onclick="updateGeneral()">Update</button>
 </div>
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 <div id="tabs2" >
@@ -49,24 +60,43 @@
     <input class="input1" id="stl"  data-toggle="tooltip" title="STL File"  placeholder="STL File or Leave blank" value="/static/stlviewer/stls/hook.stl">
 </div>
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-<div id="tabs3" >
-    <div style="height:100%;">
-    <textarea  class=c100 rows=10 id="html"  data-toggle="tooltip" title="Enter HTML"  placeholder="HTML" >
-<img src="https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AAMemdG" height="100%"/>
-    </textarea>
-    <button  class="btn btn-primary" type="button" onclick="updateHTML()">UpdateHTML</button>
+    <div id="tabs3" >
+        <div style="height:100%;">
+        <textarea  class=c100 rows=10 id="html"  data-toggle="tooltip" title="Enter HTML"  placeholder="HTML" >
+    <img src="https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AAMemdG" height="100%"/>
+        </textarea>
+        <button  class="btn btn-primary" type="button" onclick="updateHTML()">UpdateHTML</button>
+        </div>
     </div>
-</div>
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-<div id="tabs4" >
-    <input class="input1" id="datdsrc"  data-toggle="tooltip"  placeholder="Data Source" value="default:a2.csv">
-    <input class="input1" id="params"  data-toggle="tooltip"  
-        placeholder="Chart parameters"  value="filter; refresh rate, etc">
+    <div id="tabs4" >
+        <div >
+            <label class=label1 >Parameters</label>
+            <textarea class="input1 c100" style="height: 90%; " rows=6 id="chartparams"  data-toggle="tooltip"   placeholder="Chart parameters">{
+    saveas: '',
+    jcfg: '/opt/data/tseries/data/MEGANA/ds1.csv.cfg',
+    cols: "time,A000__C1, A001__C1, A002__C1",
+    filter: '', 
+    nrows: 10, 
+    forceload: 1,
 
-</div>
+    action: 'plot',
+    opts: { height: '100%', onechart: 1, clk: null, dclk: null },
+    display_rows: 10
+}
+</textarea> 
+        </div>
+    </div>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <div id="tabs5">
+        <div id="paneltabled1" style="overflow: hide;" >
+            Data
+        </div>
+    </div>
+
 </div>    
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-<div style="position: absolute; bottom: 0; width: 100%;">
+<div>
     <hr style="height: 5px; background: #010101;" />
     <button  class="btn btn-primary" type="button" onclick="updatePanel()">Update</button>
     <button  class="btn btn-primary" type="button" onclick="showSTL()">Update STL</button>
@@ -78,6 +108,50 @@
 </div>
 
 <script>
+ //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function updatePanel() {
+    ele = ACTIVE_GRID_ITEM
+    if ( !ele ) {
+        salert("No panel selected", "btn-warning")
+        return;
+    }
+    act = $('#tabs').tabs('option', 'active');
+
+    console.log('updatePanel', ele, act)
+    switch (act ){
+        case 0: updateGeneral(ele); break;
+        case 2: updatePanelAll(ele); break;
+        case 1: updateHTML(ele); break;
+        case 3: updateData(ele); break;
+    } 
+}   
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function updatePanelAll(ele) {
+    ele = (ele) ? getParentGridItem(ele) : ACTIVE_GRID_ITEM
+    console.log('updatePanel', ele)
+
+    if ( !ele ) return;
+
+    var url = $("#url")
+    var emb = $("#emb")
+    var stl = $("#stl")
+    var dat = $("#datasrc")
+
+    var con = $(ele).find(".gridcard")
+    if ( url.val() ) {
+        var val = `<iframe src="${url.val()}" width="100%" height="100%" frameborder="0"></iframe>`
+        con.html(val)
+    }
+    else if ( emb.val() ) {
+        con.html(emb.val())
+    }
+    else if ( stl.val(con) ) {
+        showSTL(con, stl.val())
+    }
+    else if ( dat.val() ) {
+        showData(stl.val())
+    }
+}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function updateHTML(ele) {
     ele = (ele) ? getParentGridItem(ele) : ACTIVE_GRID_ITEM
@@ -101,13 +175,68 @@ function updateGeneral(ele) {
 }
 
 // ---------------------------------------------------------------------------------
-function getDatasetsCB1(responseTxt){
+var DATA = null
+DATASETS = {}
+
+function getDatasetsCB1(responseTxt, statusTxt, xhr, ctx={}, formData={}){
     var ds   = JSON.parse(responseTxt);
     var vals = ds.values;
+    DATA = ds
 
+    console.log("getDatasetsCB1", ds)
 
+    var panel = ctx['PANEL']
+    var card = $(panel).find(".gridcard")
+
+    if ( !panel ) {
+        salert("No panel selected", "btn-warning")
+        return;
+    }
+    var action = ctx['action'] || 'showtable'
+
+    switch (action) {
+    case 'showtable':
+        //var div = $(card).get()[0]
+        var div = $(card)[0]
+        $(card).html('')
+
+        var chartDiv = document.createElement(`div`);
+        div.appendChild(chartDiv);
+        chartDiv.setAttribute("id", "paneltabled1");
+        chartDiv.setAttribute("class", "datatable");
+
+        showDataTable(ds, {div: div, id: 'paneltabledd1', maxitems: 5000, fillHeight:0})
+        break;
+    case 'plot':
+        //showPlot1(ds, card, ctx)
+        showStockChart(ds, card, ctx)
+        break;
+    default:
+        console.log("Unknown action", action)
+        break
+    }
+    
 }
-function getDatasets() {
-    callws('/tseries/getdatasets/',"", getDatasetsCB1)
+
+function getDataFromDatasrc(src, cfg = {}, cb) {
+    var ctx = cfg
+    if (src)   ctx['jcfg'] = src
+
+    callws('/stream/getdatacfg/',"", cb || getDatasetsCB1, ctx)
 }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function updateData(ele) {
+    console.log("updateData", ele)
+    var datasrc = $('#configure').find('#datasrc').val()
+    var params  = $('#configure').find('#chartparams').val()
+    eval( "var jp = " + params)
+    jp['PANEL'] = ACTIVE_GRID_ITEM
+    getDataFromDatasrc(null, jp)
+}
+
+$(document).ready(function() {
+    $('#tabs').tabs()
+    $('#tabs').tabs('option', 'active' ,3);
+})
+
 </script>

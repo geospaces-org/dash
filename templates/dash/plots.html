@@ -1,0 +1,154 @@
+<style>
+</style>
+<div class="resizable" id="chartcontainer" style="background-color: snow;"> </div>
+{% include "multicharts.html" %}
+{% include "multicharts1.html" %}
+<!-- -----------------------------------------------------------------------------
+    SCRIPT
+------------------------------------------------------------------------------- -->
+<script>
+function myParseDate(d) {
+    if (typeof(d) == "string" && d.startsWith('#'))
+        d = $(d).val()
+
+    var ntm = (typeof(d) === "number") ? d : d.replace('T', ' ') + " GMT"
+    var ret = new Date( ntm ).getTime()
+    return ret
+}
+function getColumnData(matrix, col){
+   var column = [];
+   for(var i=0; i<matrix.length; i++){
+       v = matrix[i][col]
+       if (typeof v === 'string')
+           if( isNaN(v) )
+               return null;
+           else
+               v = parseFloat(v)
+       column.push(v);
+   }
+   return column;
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function showStockChart(ds,  panel="#chartcontainer", trend=0, ){
+    var lcolor = (trend > 0) ? 'rgb(0, 255, 0, 0.7)' : 'rgb(255, 0, 0, 0.7)'
+    var fcolor = (trend > 0) ? '#5cb85c' : "#dc3545"
+
+    var dsv= ds.values;
+    var data=[]
+    for (i=0; i < dsv.length; i++) {
+        var ttm = myParseDate(dsv[i][0])
+        data.push([ttm,dsv[i][1] ])
+    }
+    if ( data[0][0] > data[data.length-1][0])
+        data = data.reverse()
+
+    chart = Highcharts.stockChart($(panel)[0], {
+        credits: false,
+        rangeSelector: {  selected: 0,
+            buttons: [
+                {type: 'day',   count: 1,  text: '1D' },
+                {type: 'day',   count: 5,  text: '5D' },
+                {type: 'month', count: 1,  text: '1m' },
+                {type: 'month', count: 3,  text: '3m' },
+                {type: 'month', count: 6,  text: '6m' },
+                {type: 'ytd',   text: 'YTD'           },
+                {type: 'year',  count: 1,  text: '1y' },
+                {type: 'all',   text: 'All'           }
+            ]
+        },
+        title:         { text: '' },
+        tooltip: {
+            valueDecimals: 3
+        },
+        series: [{
+            name: null,
+            data: data,
+            type: 'area',
+            color: lcolor,
+            lineWidth: 0.5,
+            threshold: null,
+            fillColor: { linearGradient: {x1: 0,y1: 0,x2: 0,y2: 0.9 },
+                stops: [
+                [0, fcolor],
+                [1, Highcharts.color(fcolor).setOpacity(0).get('rgba')]
+                ]
+            },
+            events:{
+                mouseOut: function (event) {
+                    chart.tooltip.hide()
+                },
+            }
+        }]
+    });
+    return chart
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function showPlot1(ds, panel, ctx, height='160px', onechart=1, clk=null, dclk=null) {
+    $(panel).html('')
+    var dsv = ds.values;
+    var data= {};     data.xData = [];
+    var lastKnownTime = null
+    for(var i=0; i<dsv.length; i++){
+        var ttm = myParseDate(dsv[i][0])
+        if (lastKnownTime == null)
+            lastKnownTime = ttm
+        else if ( lastKnownTime >= ttm ){
+            console.log("** Duplicate !!! ", lastKnownTime, ttm)
+            //continue
+        }
+        data.xData.push(ttm);
+    }
+    var datasets = []
+    for (i=1; i < ds.columns.length; i++) {
+        var d = { data: null, name: ds.columns[i], unit: '', type: "line", valueDecimals: 4 }
+        d.data = getColumnData(dsv, i);
+        if ( !d.data){
+            console.log("IGNORING", d.name , "<==")
+            continue;
+        }
+        datasets.push(d)
+    }
+    data.datasets = datasets
+    showSynchedChart(data, height, onechart, panel, clk, dclk)
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sdata = {
+    name: 'Chart', valueDecimals   : 4   , id: "ascore", turboThreshold:15000, 
+    type: '', color: '',
+    flags_data: null,      allowPointSelect: true,
+
+    marker: {
+        enabled: true, radius: 1,
+        states: {
+            hover: {fillColor: 'red', lineWidth: 1, radius: 3 },
+            select:{color: 'firebrick', fillColor: 'firebrick',radius: 3, }
+        }
+    },
+    data : [[0, 43934], [1000,52503], [2000,57177], [3000,69658], [4000,97031]],
+}
+function showPlot(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=null) {
+    $(panel).html('')
+    var dsv = ds.values;
+    var nvs=[]
+    var lastTT = null
+    for (i=0; i < dsv.length; i++) {
+        var ntm = (typeof(dsv[i][0]) === "number")? dsv[i][0] : dsv[i][0].replace('T', ' ') + " GMT"
+        var tt  = new Date(ntm).getTime()
+        
+        if (lastTT == null)
+            lastTT = tt
+        else if ( lastTT >= tt ){
+            console.log("** Duplicate Time values!!! ", lastTT, tt, "ignoring this item")
+            //continue
+        }
+        nvs.push([tt,dsv[i][1] ])
+    }
+    sdata.data = nvs;
+    var hopts = getHighChart("CHART Title", sdata, 0,clk);
+    var chart = Highcharts.chart($(panel)[0], hopts);
+    mcharts[0] = chart
+
+    Addsync('scorechart')
+    mcharts[0].yAxis[0].update({min:0})
+}
+</script>

@@ -1,14 +1,18 @@
 {% extends "common.html" %}
 {% block content %}
+<script src="/static/bc/highcharts/highstock.js"></script>
 
 <style type="text/css">
 .grid-stack {
     padding: 7 0 10 10;height: 100%;
-    display: flex; flex-flow: column; height: calc(100vh - 80px)
+    display: flex; flex-flow: column; hheight: calc(100vh - 80px)
  }
 .grid-stack-item-content { 
     border-radius: 6px;
     box-shadow: 1px 1px 2px #aaaaaa;
+    display: flex; 
+    flex-flow: column; 
+
 }
 
 .grid-stack-item-content { 
@@ -40,7 +44,7 @@
     padding: 0 2 0 2;
     flex-grow: 1; 
     width: 100%;
-    height: 89%;
+    hheight: 89%;
     overflow: auto;
 }
 
@@ -81,6 +85,7 @@
 <script src="/static/stlviewer/js/stlviewer.js"></script>
 
 {% include "dash/configure.html" %}
+{% include "dash/plots.html" %}
 
 <section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
 {% include "dash/top.html" %}
@@ -89,8 +94,9 @@
 <div class="grid-stack">
     <div class="grid-stack-item" gs-w="6" gs-h="5">
         <div class="grid-stack-item-content">
-        <div class="gridcard-header"> 
-            <span class="gridcard-headertitle"></span><b>Title</b>
+        <div class="gridcard-header" onclick="selectPanel(this)"> 
+            <span id=paneltitle class="gridcard-headertitle">Title</span>
+
             <span style="float: right;"> 
                 <div class="dropdown">
                     <a href="#" style="color: #000000; text-decoration: none;" data-toggle="dropdown"> 
@@ -104,10 +110,11 @@
                     </div>
                 </div>
         </div>
-
         <div class="gridcard">
         </div>
-    </div></div>
+    </div>
+
+</div>
 
 </div>
 </section>
@@ -165,7 +172,11 @@ GRID_TEMPLATE=`
 </div>
 
 <div class="gridcard" >
-    CONTENTS
+    <iframe width="90%" height="90%" src="https://www.youtube.com/embed/DuSDVj9a4WM" 
+    frameborder="0" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+    allowfullscreen>
+    </iframe>
 </div>
 `
 
@@ -187,19 +198,21 @@ function addWidget(x=last++*3, y=0, w=6, h=4, title="", content="") {
 function selectPanel(ele) {
     if (ACTIVE_GRID_ITEM)
         ACTIVE_GRID_ITEM.classList.remove('grid-stack-item-selected')
-        
 
     if ( !ele )
         ACTIVE_GRID_ITEM = GRID.getGridItems().pop()
     else {
         ele = getParentGridItem(ele)
-        if ( ele == ACTIVE_GRID_ITEM) 
+        if ( ele == ACTIVE_GRID_ITEM)
             ACTIVE_GRID_ITEM = null
         else
             ACTIVE_GRID_ITEM = ele
     }
-    if ( ACTIVE_GRID_ITEM)
+    if ( ACTIVE_GRID_ITEM) {
         ACTIVE_GRID_ITEM.classList.add('grid-stack-item-selected')
+        var titv = $(ACTIVE_GRID_ITEM).find("#paneltitle")
+        $('#configure').find('#title').val(titv.html())
+    }
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function getParentGridItem(ele, depth=25) {
@@ -234,33 +247,7 @@ function showSTL(con, stlfile) {
 
     STLViewerEnable(name, true);
 }
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function updatePanel(ele) {
-    ele = (ele) ? getParentGridItem(ele) : ACTIVE_GRID_ITEM
-    console.log('updatePanel', ele)
 
-    if ( !ele ) return;
-
-    var url = $("#url")
-    var emb = $("#emb")
-    var stl = $("#stl")
-    var dat = $("#datasrc")
-
-    var con = $(ele).find(".gridcard")
-    if ( url.val() ) {
-        var val = `<iframe src="${url.val()}" width="100%" height="100%" frameborder="0"></iframe>`
-        con.html(val)
-    }
-    else if ( emb.val() ) {
-        con.html(emb.val())
-    }
-    else if ( stl.val(con) ) {
-        showSTL(con, stl.val())
-    }
-    else if ( dat.val() ) {
-        showData(stl.val())
-    }
-}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function removeWidget(ele) {
     ele = getParentGridItem(ele)
@@ -290,6 +277,7 @@ $(document).ready(function() {
     addWidget()
     selectPanel()
 })
+
 </script>
 
 {% endblock %}
