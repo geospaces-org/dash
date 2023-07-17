@@ -83,7 +83,10 @@ function showStockChart(ds,  panel="#chartcontainer", trend=0, ){
     return chart
 }
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function showPlot1(ds, panel, ctx, height='160px', onechart=1, clk=null, dclk=null) {
+function showPlot1(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=null) {
+
+    onechart = ctx.onechart || onechart
+
     $(panel).html('')
     var dsv = ds.values;
     var data= {};     data.xData = [];
@@ -110,6 +113,29 @@ function showPlot1(ds, panel, ctx, height='160px', onechart=1, clk=null, dclk=nu
     }
     data.datasets = datasets
     showSynchedChart(data, height, onechart, panel, clk, dclk)
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function getDSData(ds, i=1){
+    var dsv= ds.values
+    ret = []
+    for(u of dsv ) {
+        tt = new Date(u[0]).getTime();
+        ret.push([tt, u[i]])
+    }
+    return ret
+}
+function showPlot2(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=null) {
+    $(panel).html('')
+
+    var dd1    = getDSData(ds,1)
+    var sdsv  = { name: ds.columns[1], data: dd1, color: 'green'}
+    var hopts = getHighChart("score", sdsv, 1, clk);
+    var chart = Highcharts.chart($(panel)[0], hopts);
+    //mcharts[0] = chart
+
+    mcharts.push(chart)
+    Addsync($(panel)[0])
+    //mcharts[0].yAxis[0].update({min:0})
 }
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sdata = {
@@ -146,9 +172,7 @@ function showPlot(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=nul
     sdata.data = nvs;
     var hopts = getHighChart("CHART Title", sdata, 0,clk);
     var chart = Highcharts.chart($(panel)[0], hopts);
-    mcharts[0] = chart
+    //mcharts.push(chart)
 
-    Addsync('scorechart')
-    mcharts[0].yAxis[0].update({min:0})
 }
 </script>
