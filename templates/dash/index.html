@@ -86,6 +86,7 @@
 
 {% include "dash/configure.html" %}
 {% include "dash/plots.html" %}
+{% include "dash/gridstack.html" %}
 
 <section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
 {% include "dash/top.html" %}
@@ -170,18 +171,20 @@ GRID_TEMPLATE=`
         </div>
     </span>
 </div>
+<textarea id=config cols=10 rows=5 hidden></textarea>
 
 <div class="gridcard" >
-    <iframe width="90%" height="90%" src="https://www.youtube.com/embed/DuSDVj9a4WM" 
+    <!-- iframe width="90%" height="90%" src="https://www.youtube.com/embed/DuSDVj9a4WM" 
     frameborder="0" 
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
     allowfullscreen>
-    </iframe>
+    </iframe -->
+    -- STUFF -- 
 </div>
 `
 
 var last=0
-function addWidget(x=last++*3, y=0, w=6, h=4, title="", content="") {
+function addWidget(x=last++*6, y=0, w=6, h=4, title="", content="") {
     var html = GRID_TEMPLATE;
     html=html.replace('Title', title || "Panel "+last);
     
@@ -190,8 +193,8 @@ function addWidget(x=last++*3, y=0, w=6, h=4, title="", content="") {
     else
         html=html.replace('CONTENTS', frames[last%frames.length]);
 
-
-    GRID.addWidget( {x:x, y:y, w:w, h:h, content: html} ) 
+    
+    GRID.addWidget( {x:0, y:0, w:w, h:h, auto_position: true, content: html} ) 
     selectPanel()
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -212,6 +215,8 @@ function selectPanel(ele) {
         ACTIVE_GRID_ITEM.classList.add('grid-stack-item-selected')
         var titv = $(ACTIVE_GRID_ITEM).find("#paneltitle")
         $('#configure').find('#title').val(titv.html())
+
+        $('#gridparms').val ($(ACTIVE_GRID_ITEM).find("#config").val())
     }
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
