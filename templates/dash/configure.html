@@ -18,9 +18,6 @@
      -moz-box-sizing: border-box;    /* Firefox, other Gecko */
      box-sizing: border-box;
 }
-.div1 {
-    display: inline-block;
-}
 .datatable{
     overflow: auto;
     height: auto;
@@ -29,33 +26,67 @@
 </style>
 
 <div id="configure" class="configure draggable" style="display: none1;" >
-<div id="tabs" class=tabs>
+<div id="tabs" class=tabs style="height:85%;">
 <ul>
     <li><a href="#tabs1" >General</a></li>
-    <li><a href="#tabs2" >Contents</a></li>
+    <li><a href="#tabs2" >3D</a></li>
     <li><a href="#tabs3" >HTML</a></li>
     <li><a href="#tabs4" >Plots</a></li>
-    <li><a href="#tabs5" >Data</a></li>
+    <li><a href="#tabs5" >X</a></li>
+    <li><a href="#tabs6" >Dashboards</a></li>
 </ul>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<div id="tabs5" >
+    <textarea class="input1 c100" style="height:80%;" rows=6 id="saved_dashboard"  placeholder="">
+    </textarea>
+    <a onclick="$('#configure').toggle()" >X</a>
+    <button  class="btn btn-primary" type="button" onclick="loadDashboard($('#saved_dashboard').val())">LoadDashBoard</button>
+    <div class="div1" style="display: inline-block;">
+        <label class=label1 >Name to save as</label>
+        <input class="input1" id="dash_saveas" placeholder="save as" value="" required>
+    </div>
+    <button  class="btn btn-primary" type="button" onclick="saveDashboard()">Save to Disk</button>
+</div>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<div id="tabs6" >
+    <div id="dashboards_list" style="overflow: auto;">
+    </div>
+</div>
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 <div id="tabs1" >
     <label class=label1 >Title</label>
-    <input class="input1" id="title"  data-toggle="tooltip"  title="Title for the panel" placeholder="Title" value="_._">
+    <input class="input1" id="title"  data-toggle="tooltip"  title="Title for the panel" placeholder="Title" value="_._" readonly>
     <div >
         <label class=label1 >Parameters</label>
-        <textarea class="input1 c100" style="height:80%" rows=6 id="gridparms"  placeholder="">{
-title: 'Panel Title',
-refresh: '10s', 
-movable: 1
+        <textarea class="input1 c100" style="height:70%;" rows=6 id="gridparms"  placeholder="">{
+    title: 'Panel Title',
+    action: 'html|3D|data|url',
+
+    refresh: '10s', 
+    movable: 1,
+    stlfile: '/static/stlviewer/stls/hook.stl',
+
+    url: '',
+    html: `
+    <img src="https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA1dYAkF.img?w=208&h=168&q=90&m=6&f=jpg&u=t" height="100%"/>
+    `,
+
+    data: {
+        saveas: '',
+        jcfg: '/opt/data/tseries/data/default/a1normal.csv.cfg',
+        cols: "time, ALARM.PERIOD, C01.MV",
+        filter: '', 
+        nrows: 1000, 
+        action: 'plot1',
+        opts: { height: '100%', onechart: 0, clk: null, dclk: null },
+        display_rows: 10
+    }    
 }</textarea> 
     </div>
 
 </div>
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 <div id="tabs2" >
-    <label class=label1 > URL and external link </label>
-    <input class="input1" id="url"  data-toggle="tooltip" title="Extrenal URL"  placeholder="URL or Leave blank" value="">
-
     <label class=label1 >STL Source</label>
     <input class="input1" id="stl"  data-toggle="tooltip" title="STL File"  placeholder="STL File or Leave blank" value="/static/stlviewer/stls/hook.stl">
 </div>
@@ -74,123 +105,145 @@ movable: 1
             <label class=label1 >Parameters</label>
             <textarea class="input1 c100" style="height: 80%; " rows=6 id="chartparams"  data-toggle="tooltip"   placeholder="Chart parameters">{
     saveas: '',
-    jcfg: '/opt/data/tseries/data/MEGANA/ds1.csv.cfg',
-    cols: "time,A000__C1, A001__C1, A002__C1",
+    jcfg: '/opt/data/tseries/data/default/a1normal.csv.cfg',
+    cols: "time, ALARM.PERIOD, C01.MV",
     filter: '', 
-    nrows: 10, 
-    forceload: 1,
-
-    action: 'plot',
-    opts: { height: '100%', onechart: 1, clk: null, dclk: null },
+    nrows: 1000, 
+    action: 'plot|plot1|plot2|showdata',
+    opts: { height: '100%', onechart: 0, clk: null, dclk: null },
     display_rows: 10
 }
         </textarea> 
-        </div>
-    </div>
-<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    <div id="tabs5">
-        <div id="paneltabled11" style="overflow: hide;" >
-            Data
-        </div>
-        <div> 
-        <textarea id="savedgrids" style="width: 100%;height:80%;" ></textarea>
-        </div>
-    </div>
+        <button  class="btn btn-primary" type="button" onclick="updateData()">Update Data</button>
 
-</div>    
+        </div>
+    </div>
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+</div>    
 <div>
     <hr style="height: 5px; background: #010101;" />
-    <button  class="btn btn-primary" type="button" onclick="updatePanel()">Update</button>
-    <button  class="btn btn-primary" type="button" onclick="showSTL()">Update STL</button>
-    <button  class="btn btn-primary" type="button" onclick="showData()">Update Data</button>
-    <button  class="btn btn-primary" type="button" onclick="savePanel()">Save</button>
-    <button  class="btn btn-primary"  onclick="$('#configure').toggle()">Hide</button>
+    <button  class="btn btn-primary" type="button" onclick="setPanelContents()">Update Panel</button>
 </div>    
 
 </div>
 
 <script>
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function savePanel(ele, cfg=null) {
-    var v =  cfg || $('#gridparms').val()
-    $(ACTIVE_GRID_ITEM).find("#config").val(v)
+function saveDashboard(name, contents) {
+    var ctx = {name: $('#dash_saveas').val(), contents: $('#saved_dashboard').val()}
+    callws('/dashboard/save_dashboard/',"", loadAllDashboards, ctx)
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function refreshPanelContents() {
+function loadDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
+    $('#saved_dashboard').val(responseTxt)
 }
-function refreshPanelAll(ele) {
-    
-    $(ACTIVE_GRID_ITEM).find("#config").val(v)
-    refreshPanelContents()
+function getDashboard(name) {
+    var ctx = { name: name }
+    callws('/dashboard/get_dashboard/',"", loadDashboardCB, ctx)
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function updatePanel() {
-    ele = ACTIVE_GRID_ITEM
+function loadAllDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
+    var ds   = JSON.parse(responseTxt);
+    var vals = ds.values;
+    console.log("loadAllDashboardCB", ds)
+    showDataTable(ds, {div: '#dashboards_list', id: 'dashboardlist', maxitems: 5000, fillHeight: 0 })
+}
+function loadAllDashboards() {
+    callws('/dashboard/getall_dashboards/',"", loadAllDashboardCB, {})
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function deleteDashboard(name) {
+    var ctx = {name: name}
+    callws('/dashboard/delete_dashboard/',"", loadAllDashboardCB, ctx)
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function setPanelContents(ele, cfg=null, update=1) {
+    ele = ele || ACTIVE_GRID_ITEM
     if ( !ele ) {
-        salert("No panel selected", "btn-warning")
+        salert("No panel selected: Select a panel", "btn-warning")
         return;
     }
-    act = $('#tabs').tabs('option', 'active');
+    var ncfg =  cfg || $('#gridparms').val().trim()
+    $(ele).find("#config").val(ncfg)
 
-    console.log('updatePanel', ele, act)
-    switch (act ){
-        case 0: updateGeneral(ele); break;
-        case 2: updatePanelAll(ele); break;
-        case 1: updateHTML(ele); break;
-        case 3: updateData(ele); break;
+    if ( update)
+        updatePanelContents(ele)
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+let ONE_STL_SHOWING = 0
+function updatePanelContents(ele, jcfg=null) {
+    // assert ele is valid 
+    if ( jcfg == null ){
+        var pcfg = $(ele).find("#config").val()
+        if (!pcfg){
+            salert("Configuration is empty!!", "btn-warning")
+            return;
+        }
+        console.log(pcfg)
+        eval("var jcfg = " + pcfg)
+        // jcfg ==> will have the config if everything was OK
+    }
+
+    var content = $(ele).find(".gridcard")
+
+    // #1. Set the pnale Title
+    $(ele).find("#paneltitle").html( jcfg['title'] || "." )
+
+    // #2. Set the refresh cycle
+    if (jcfg['refresh']) {
+        // set up refresh cycle
+    }
+
+    // #3. Set the content
+    var action = jcfg['action'].split("|")[0].toLowerCase()
+    switch (action){
+        case "3d": 
+                if (0 && ONE_STL_SHOWING) {
+                    salert("Only one STL can be shown at a time", "btn-warning")
+                    return
+                }
+                showSTL(content, jcfg['stlfile']); 
+                break;
+        case "html": 
+                content.html(jcfg['html'])
+                break;
+        case "url":
+            var val = `<iframe src="${jcfg['url']}" width="100%" height="100%" frameborder="0"></iframe>`
+            content.html(val)
+            break;
+        case "data": 
+                updateData(ele, jcfg['data']); 
+                break;
+        default:
+            console.log("Unknown action", action)
+            break
     } 
-}   
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function updatePanelAll(ele) {
-    ele = (ele) ? getParentGridItem(ele) : ACTIVE_GRID_ITEM
-    console.log('updatePanel', ele)
-
-    if ( !ele ) return;
-
-    var url = $("#url")
-    var emb = $("#emb")
-    var stl = $("#stl")
-    var dat = $("#datasrc")
-
-    var con = $(ele).find(".gridcard")
-    if ( url.val() ) {
-        var val = `<iframe src="${url.val()}" width="100%" height="100%" frameborder="0"></iframe>`
-        con.html(val)
-    }
-    else if ( emb.val() ) {
-        con.html(emb.val())
-    }
-    else if ( stl.val(con) ) {
-        showSTL(con, stl.val())
-    }
-    else if ( dat.val() ) {
-        showData(stl.val())
-    }
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function updateHTML(ele) {
-    ele = (ele) ? getParentGridItem(ele) : ACTIVE_GRID_ITEM
-    if ( !ele ) {
-        salert("No panel selected", "btn-warning")
-        return;
+var STLDIV=`
+<p id="boundingbox" style="margin-top:0; margin-bottom:0;float: left; border: 1px solid #ccc;"></p>
+    <p id="mousepos"    style="margin-top:0; margin-bottom:0; float: right;"></p>
+    <div class="stlviewer" data-src="/static/stlviewer/stls/orion_nofbc.stl">
+    </div>
+`
+function showSTL(ele, stlfile) {
+    ele = (ele) ? ele : $(ACTIVE_GRID_ITEM).find(".gridcard")
+    if (!stlfile) {
+        var stlfile = $("#stl").val()
     }
-    var emb = $("#html")
-    var con = $(ele).find(".gridcard")
-    con.html(emb.val())
-}
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function updateGeneral(ele) {
-    ele = (ele) ? getParentGridItem(ele) : ACTIVE_GRID_ITEM
-    if ( !ele ) {
-        salert("No panel selected", "btn-warning")
-        return;
-    }
-    $(ele).find("#paneltitle").html( $("#title").val() )
-}
+    var name = 'stlviewer'
+    console.log('showSTL', stlfile, name)
 
+    $(ele).html(STLDIV) 
+    $("."+name).attr("data-src", stlfile)
+
+    STLViewerEnable(name, true);
+
+    ONE_STL_SHOWING = 1
+
+}
 // ---------------------------------------------------------------------------------
 var DATA = null
 DATASETS = {}
@@ -211,26 +264,31 @@ function getDatasetsCB1(responseTxt, statusTxt, xhr, ctx={}, formData={}){
     }
     var action = ctx['action'] || 'showtable'
 
+    action = action.split("|")[0]
     switch (action) {
-    case 'showtable':
-        //var div = $(card).get()[0]
+
+    case 'plot':
+        showStockChart(ds, card, ctx)
+        break;
+    case 'plot1':
+        showPlot1(ds, card, ctx)
+        break;
+    case 'plot2':
+        showPlot2(ds, card, ctx)
+        break;
+
+    case 'showdata':
+    default:
         var div = $(card)[0]
         $(card).html('')
 
-        var chartDiv = document.createElement(`div`);
-        div.appendChild(chartDiv);
-        chartDiv.setAttribute("id", "paneltabled1");
-        chartDiv.setAttribute("class", "datatable");
+        //var chartDiv = document.createElement(`div`);
+        //div.appendChild(chartDiv);
+        //chartDiv.setAttribute("id", "paneltabled1");
+        //chartDiv.setAttribute("class", "datatable");
 
         showDataTable(ds, {div: div, id: 'paneltabledd1', maxitems: 5000, fillHeight:0})
         break;
-    case 'plot':
-        //showPlot1(ds, card, ctx)
-        showStockChart(ds, card, ctx)
-        break;
-    default:
-        console.log("Unknown action", action)
-        break
     }
     
 }
@@ -242,18 +300,23 @@ function getDataFromDatasrc(src, cfg = {}, cb) {
     callws('/stream/getdatacfg/',"", cb || getDatasetsCB1, ctx)
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function updateData(ele) {
+function updateData(ele, cfg=null) {
     console.log("updateData", ele)
-    var datasrc = $('#configure').find('#datasrc').val()
-    var params  = $('#configure').find('#chartparams').val()
-    eval( "var jp = " + params)
+    
+    var params  = cfg || $('#configure').find('#chartparams').val()
+
+    jp = cfg
+    if ( typeof(params) == "string")
+        eval( "var jp = " + params)
+    
     jp['PANEL'] = ACTIVE_GRID_ITEM
     getDataFromDatasrc(null, jp)
 }
 
 $(document).ready(function() {
     $('#tabs').tabs()
-    $('#tabs').tabs('option', 'active' ,3);
+    loadAllDashboards()
+    //$('#tabs').tabs('option', 'active' ,3);
 })
 
 </script>

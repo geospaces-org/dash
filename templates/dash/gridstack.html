@@ -1,0 +1,51 @@
+<script>
+var ALL_GRIDS = []
+var SAVED_JSON = null
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function saveDashboardJSON() {
+    console.log("saveDashboardJSON");
+    ALL_GRIDS=[]
+
+    var gridItems = GRID.getGridItems()
+
+    for (var g in gridItems) {
+        var grid = gridItems[g]
+        var gs = grid.gridstackNode
+
+        var grid = {
+            id: gs._id,  x: gs.x, y: gs.y, w: gs.w, h: gs.h,
+            config: $(grid).find("#config").val()
+        }
+        ALL_GRIDS.push(grid)
+    }
+    SAVED_JSON = JSON.stringify(ALL_GRIDS, null, '  ')
+    $('#saved_dashboard').val(SAVED_JSON)   
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+var last=0
+function addWidget(x=last++*6, y=0, w=6, h=4, title="", content="") {
+    var html = GRID_TEMPLATE;
+    html=html.replace('Title', title || "Panel "+last);
+    
+    if  (content)
+        html=html.replace('CONTENTS', content);
+    else
+        html=html.replace('CONTENTS', frames[last%frames.length]);
+    
+    var g = GRID.addWidget( {x:x, y:y, w:w, h:h, auto_position: true, content: html} ) 
+    toggleSelectPanel()
+    return g
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function loadDashboard(json=SAVED_JSON) {
+    console.log("loadDashboard");
+    var gridItems = JSON.parse(json )
+
+    for (var g in gridItems) {
+        var grid = gridItems[g]
+        var ng = addWidget(grid.x, grid.y, grid.w, grid.h, "", "")
+        setPanelContents($(ng), grid.config)
+    }
+}
+
+</script>
