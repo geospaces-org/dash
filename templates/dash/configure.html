@@ -130,12 +130,20 @@
 <script>
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function saveDashboard(name, contents) {
-    var ctx = {name: $('#dash_saveas').val(), contents: $('#saved_dashboard').val()}
+    var ctx = { name: name || $('#dash_saveas').val(), 
+                contents: contents || $('#saved_dashboard').val()}
+    if (!ctx.name || !ctx.contents) {
+        salert("Name: ${name} or Contents: ${contents} is empty!!", "btn-warning")
+        return;
+    }
     callws('/dashboard/save_dashboard/',"", loadAllDashboards, ctx)
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function loadDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
     $('#saved_dashboard').val(responseTxt)
+    GRID.removeAll()
+    loadDashboard(responseTxt)
+
 }
 function getDashboard(name) {
     var ctx = { name: name }
@@ -146,7 +154,17 @@ function loadAllDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
     var ds   = JSON.parse(responseTxt);
     var vals = ds.values;
     console.log("loadAllDashboardCB", ds)
-    showDataTable(ds, {div: '#dashboards_list', id: 'dashboardlist', maxitems: 5000, fillHeight: 0 })
+    showDataTable(ds, 
+        {   div: '#dashboards_list', id: 'dashboardlist', 
+            maxitems: 5000, fillHeight: 0,
+            rowSelectCB: function(table, tr, indx, curSelected, vals) {
+                if ( curSelected < 0) {
+                    return
+                }
+                var name = tr.getElementsByTagName('td')[0].innerText
+                getDashboard(name)
+                $('#dash_saveas').val(name)
+            }})
 }
 function loadAllDashboards() {
     callws('/dashboard/getall_dashboards/',"", loadAllDashboardCB, {})
