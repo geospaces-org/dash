@@ -14,9 +14,13 @@ logger = logging.getLogger( "geoapp" )
 @webapi("/dashboard/save_dashboard")
 def save_dashboard( name, contents, **kwargs):
     name = name or "default"
+    if (name.endswith(".json")):
+        name = name[:-5]
+        
     dst = f"{MBASE}/{name}.json"
-    if not os.path.exists(os.path.dirname(dst) ):
-        os.makedirs(dst)
+    dstd= os.path.dirname(dst)
+    if not os.path.exists(dstd ):
+        os.makedirs(dstd)
     
     with open(dst, "w") as f:
         f.write(contents.strip())
