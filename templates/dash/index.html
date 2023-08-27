@@ -47,7 +47,6 @@
     font-weight: bold;
 }
 
-
 .gridcard {
     text-align: left;
     padding: 0 2 0 2;
@@ -68,9 +67,7 @@
 
 .dropdown-item {
     font-size: small;
-}
-
- 
+} 
 
 .btn100{
     width: 100%;
@@ -79,23 +76,19 @@
     text-align: center;
 }
 </style>
-
-
 {% include "dash/configure.html" %}
-{% include "dash/plots.html" %}
 {% include "dash/gridstack.html" %}
 
-<section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
 {% include "dash/top.html" %}
-
-<hr/>
+<section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
 <div class="grid-stack">
+    <!--
+
     <div class="grid-stack-item" gs-w="6" gs-h="5">
         <div class="grid-stack-item-content">
-        <div class="gridcard-header" onclick="toggleSelectPanel(this)"> 
-            <span id=paneltitle class="gridcard-headertitle">Title</span>
-
-            <span style="float: right;"> 
+            <div class="gridcard-header" onclick="toggleSelectPanel(this)"> 
+                <span id=paneltitle class="gridcard-headertitle">Title</span>
+                <span style="float: right;"> 
                 <div class="dropdown">
                     <a href="#" style="color: #000000; text-decoration: none;" data-toggle="dropdown"> 
                         ...
@@ -107,13 +100,13 @@
                         <a class="dropdown-item" href="#">Save</a>
                     </div>
                 </div>
+            </div>
+            <textarea id=config cols=10 rows=5 hidden></textarea>
+            <div class="gridcard"></div>
         </div>
-        <textarea id=config cols=10 rows=5 hidden></textarea>
-        <div class="gridcard">
-        </div>
-    </div>
 
-</div>
+    </div>
+    -->
 </div>
 </section>
 
@@ -147,9 +140,7 @@ document.onmousedown = function (e) {
         console.log('grid_options.handle', e.altKey )
     }
 };
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 GRID_TEMPLATE=`
 <div class="gridcard-header" onclick="toggleSelectPanel(this)"> 
     <span id=paneltitle class="gridcard-headertitle">Title</span>
@@ -200,8 +191,7 @@ function toggleSelectPanel(ele) {
     if ( ACTIVE_GRID_ITEM) {
         ACTIVE_GRID_ITEM.classList.add('grid-stack-item-selected')
         var titv = $(ACTIVE_GRID_ITEM).find("#paneltitle")
-        $('#configure').find('#title').val(titv.html())
-        
+        //$('#configure').find('#title').val(titv.html())
         parms = $(ACTIVE_GRID_ITEM).find("#config").val()
         if (parms && parms.trim())   
             $('#gridparms').val(parms.trim())
@@ -218,12 +208,41 @@ function getParentGridItem(ele, depth=25) {
         return ele
     console.log('Could not find grid-stack-item')
 }
-
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+let TIMERS = {}
+function removeTimer(ele) {
+    if (TIMERS[ele]) {
+        clearInterval(TIMERS[ele])
+        delete TIMERS[ele]
+    }
+}
+function setTimer(ele, time=3000, func=refreshPanelContents) {
+    if ( !ele || time <=0 ) {
+        return
+    }
+    if (TIMERS[ele]) {
+        clearInterval(TIMERS[ele])
+        delete TIMERS[ele]
+    }
+    TIMERS[ele]  = setInterval(function(){ func(ele) },time);
+    return  TIMERS[ele]
+}
+function clearTimers() {
+    for (var e in TIMERS) {
+        clearInterval(TIMERS[ele])
+        delete TIMERS[ele]
+    }
+    TIMERS = []
+}
+function updatePanelTime(ele) {
+    console.log(ele, "... :)")
+}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function removeWidget(ele) {
     ele = getParentGridItem(ele)
     if ( ele )
         GRID.removeWidget(ele)
+        removeTimer(ele)
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 var items = [

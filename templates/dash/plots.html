@@ -173,4 +173,26 @@ function showPlot(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=nul
     var chart = Highcharts.chart($(panel)[0], hopts);
 
 }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function getDataFromDatasrc(src, cfg = {}, cb) {
+    var ctx = cfg
+    if (src)   ctx['jcfg'] = src
+    callws('/stream/getdatacfg/',"", cb || getDatasetsCB1, ctx)
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function updateData(ele) {
+    console.log("updateData", ele)
+    
+    datasrc1 =  
+    datasrc2 =  'default/test1.csv.cfg'
+
+    var params  = $('#configure').find('#chartparams').val()
+
+    if ( typeof(params) == "string")
+        eval( "var jp = " + params)
+    
+    jp['PANEL'] = ACTIVE_GRID_ITEM
+    getDataFromDatasrc(null, jp)
+}
+
 </script>

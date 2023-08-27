@@ -1,11 +1,21 @@
 <div style="text-align: end;">
-<span style="padding: 10px;">
-    <a onclick="addWidget()" href="#">Add Panel</a>
-    | &nbsp;&nbsp; <a onclick="$('#configure').toggle()" href="#">Toggle Configure Panel</a>
-    | &nbsp;&nbsp; <a onclick="saveDashboardJSON()" href="#">Save </a>
-    | &nbsp;&nbsp; <a onclick="loadDashboard()" href="#">Load </a>
-    | &nbsp;&nbsp; <a onclick="GRID.removeAll()" href="#">Clear Grid </a>
-    | &nbsp;&nbsp; <a href="/dash/dash/about.html/" href="#">About </a>
+<style>
+.btnxsm {
+    line-height: 1.2;
+    font-size: smaller;
+    border-right: 2px solid black;
+}    
+</style>
+
+<span  class="btn-group" style=" width: 50%;" >
+<a class="btn btn-secondary btn-sm btnxsm" type="button" onclick="addWidget()" href="#">Add Panel</a>
+<a class="btn btn-secondary btn-sm btnxsm" type="button" onclick="saveDashboardToDisk()" href="#">Save </a>
+<a class="btn btn-secondary btn-sm btnxsm" type="button" onclick="GRID.removeAll()" href="#">Clear canvas </a>
+<a class="btn btn-secondary btn-sm btnxsm" type="button" href="/dash/dash/about.html/" >About </a>
+<a class="btn btn-secondary btn-sm btnxsm" type="button" onclick="$('#content').get(0).requestFullscreen()" href="#">
+    <i class="fas fa-expand"></i> </a>
+    
 </span>
+
 </div>
 
