@@ -72,11 +72,7 @@
         refresh_func: null, 
 
         // STLs configuration
-        stls: [
-               {
-                    stlfile: '/static/stlviewer/stls/hook.stl'
-               } 
-            ],
+        stlfile: '/static/stlviewer/stls/hook.stl',
         //
         url: '',
         //
@@ -104,19 +100,13 @@
     <h3>CHARTS</h3>
 </div>
 <div id="tabs3" >
-    <div style="padding: 20px;" >
-    <p >
-    Embed HTML into your Panel. It can consists of dynamic text you can set using Javascript.
-    You can embed other URLs. For ex. you tube embedding is done as follows:
-    </p>
-    <pre>&lt;iframe width="100%" height="315" src="https://www.youtube.com/embed/u2-8W8gEvCo?si=_90yyTZCKBqoFdn2"
-            title="YouTube video player" frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    allowfullscreen>
+    <p><b>Example to Embed youtube:</b></p>
+<p style="padding-left: 5px; font-size: smaller;">
+&lt;iframe width="100%" height="315" src="https://www.youtube.com/embed/u2-8W8gEvCo?si=_90yyTZCKBqoFdn2"
+title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
     </iframe>
-    </pre>
-</div>
-
+</p>
+<hr/>
 <textarea  class=c100 style="height:40%;" id="html"  placeholder="HTML" >
     <img src="http://localhost:8000/static/imgs/stream.png"" height="20%"/>
     <center>
@@ -124,6 +114,14 @@
     </center>
 </textarea>
 <button  class="btn btn-primary" type="button" onclick="updateHTML()">Confirm and Update!</button>
+
+<textarea  class=c100 style="height:10%;" id="stl"  >
+/static/stlviewer/stls/hook.stl
+</textarea>
+<button  class="btn btn-primary" type="button" onclick="updateSTL()">Update STL!</button>
+
+
+
 </div>
             
 <div id="tabs4" >
@@ -183,7 +181,7 @@
 </div>
 
 <div id="configure_butt"  class="posfbr" style="display: none1;z-index: 1000;" >
-    <button  class="btn btn-warning btn-xsm " type="button" onclick="togglestuff()">x</button>
+    <button  class="btn-secondary btn-xsm " type="button" onclick="togglestuff()">^</button>
 </div>
 <!--
 
@@ -200,7 +198,7 @@ function saveDashboardToDisk() {
     var json = getDashboardJSON()
     $('#saved_dashboard').val(json)   
 
-    $('#tabs').tabs('option', 'active' ,3);
+    $('#tabs').tabs('option', 'active' ,4);
     salert("Review and choos a name for dashboard and click save!")
 }
 function saveDashboard() {
@@ -252,10 +250,26 @@ function deleteDashboard(name) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function updateHTML() {
     var ncfg =  $('#gridparms').val().trim()
-    var html =  $('#html').val().trim()
+    var stl =  $('#stl').val().trim()
     eval("var cfg= "+ ncfg)
 
     cfg.action = 'html'
+    delete cfg.stls
+    delete cfg.data
+    delete cfg.url
+    delete cfg.html
+    cfg.stl = stl
+
+    $('#gridparms').val(JSON.stringify(cfg, null, 3))
+    setPanelContents(null, JSON.stringify(cfg, null, 3) )
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function updateSTL() {
+    var ncfg =  $('#gridparms').val().trim()
+    var html =  $('#html').val().trim()
+    eval("var cfg= "+ ncfg)
+
+    cfg.action = '3D'
     delete cfg.stls
     delete cfg.data
     delete cfg.url
@@ -434,6 +448,11 @@ function showSTL(ele, stlfile) {
     var jcfg = $(ele).data('cfg')
     var gridcard = $(ele).find(".gridcard")
     $(gridcard).html(STLDIV) 
+
+    let v = $(gridcard).find(".stlviewer")
+    stlv =  new STLViewer(v, jcfg.stlfile );
+
+    /*
     for (var s in jcfg.stls){
         s = jcfg.stls[s]
         let v = $(gridcard).find(".stlviewer")
@@ -441,6 +460,7 @@ function showSTL(ele, stlfile) {
         jcfg.stlv = stlv;
         break;
     }
+    */
 }
 // ---------------------------------------------------------------------------------
 var DATA = null
