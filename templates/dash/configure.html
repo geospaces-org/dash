@@ -108,12 +108,12 @@ title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; cli
 </p>
 <hr/>
 <textarea  class=c100 style="height:40%;" id="html"  placeholder="HTML" >
-    <img src="http://localhost:8000/static/imgs/stream.png"" height="20%"/>
+    <img src="/static/imgs/stream.png"" height="20%"/>
     <center>
     <font style='font-size: 100px; padding: 15px;'>${new Date().toISOString().substring( 11, 19)}</font>
     </center>
 </textarea>
-<button  class="btn btn-primary" type="button" onclick="updateHTML()">Confirm and Update!</button>
+<button  class="btn btn-primary" type="button" onclick="updateHTML()">Update HTML</button>
 
 <textarea  class=c100 style="height:10%;" id="stl"  >
 /static/stlviewer/stls/hook.stl
@@ -238,6 +238,8 @@ function loadAllDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
                 getDashboard(name)
                 $('#dash_saveas').val(name)
             }})
+
+    $('#tabs').tabs( "option", "heightStyle", "fill" )
 }
 function loadAllDashboards() {
     callws('/dashboard/getall_dashboards/',"", loadAllDashboardCB, {})
@@ -248,29 +250,31 @@ function deleteDashboard(name) {
     callws('/dashboard/delete_dashboard/',"", loadAllDashboardCB, ctx)
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function updateHTML() {
+function updateSTL() {
     var ncfg =  $('#gridparms').val().trim()
     var stl =  $('#stl').val().trim()
     eval("var cfg= "+ ncfg)
 
-    cfg.action = 'html'
+    cfg.action = '3D'
     delete cfg.stls
+    delete cfg.stlfile
     delete cfg.data
     delete cfg.url
     delete cfg.html
-    cfg.stl = stl
+    cfg.stlfile = stl
 
     $('#gridparms').val(JSON.stringify(cfg, null, 3))
     setPanelContents(null, JSON.stringify(cfg, null, 3) )
 }
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function updateSTL() {
+//~~~~~~~~~~~~~stlfile~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function updateHTML() {
     var ncfg =  $('#gridparms').val().trim()
     var html =  $('#html').val().trim()
     eval("var cfg= "+ ncfg)
 
-    cfg.action = '3D'
+    cfg.action = 'html'
     delete cfg.stls
+    delete cfg.stlfile
     delete cfg.data
     delete cfg.url
     delete cfg.html
@@ -522,6 +526,7 @@ function processWindowURL() {
 $(document).ready(function() {
     loadAllDashboards()
     //$('#tabs').tabs('option', 'active' ,3);
+
 })
 
 </script>
