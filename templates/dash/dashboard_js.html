@@ -1,0 +1,70 @@
+<!--
+    This file is included in the dashboard.html file.
+    It contains the javascript code for the dashboard.
+    It is included in the dashboard.html file.
+-->
+<script>
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function togglestuff() {
+    $('#configure').toggle()
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function saveDashboardJSON() {
+    console.log("Save dashboard to disk!")
+    $('#configure').show()
+    var json = getDashboardJSON()
+    $('#saved_dashboard').val(json)   
+
+    $('#tabs').tabs('option', 'active' ,4);
+    salert("Review and choos a name for dashboard and click save!")
+}
+function saveDashboard() {
+    var contents = $('#saved_dashboard').val()
+    var name = $('#dash_saveas').val()
+
+    var ctx = { name: name, contents: contents }
+    if (!ctx.name || !ctx.contents) {
+        salert("Name: ${name} or Contents: ${contents} is empty!!", "btn-warning")
+        return;
+    }
+    callws('/dashboard/save_dashboard/',"", loadAllDashboards, ctx)
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function loadDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
+    $('#saved_dashboard').val(responseTxt)
+    GRID.removeAll()
+    loadDashboard(responseTxt)
+}
+function getDashboard(name) {
+    var ctx = { name: name }
+    callws('/dashboard/get_dashboard/',"", loadDashboardCB, ctx)
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function loadAllDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
+    var ds   = JSON.parse(responseTxt);
+    var vals = ds.values;
+    //console.log("loadAllDashboardCB", ds)
+    showDataTable(ds, 
+        {   div: '#dashboards_list', id: 'dashboardlist', 
+            maxitems: 5000, fillHeight: 0,
+            rowSelectCB: function(table, tr, indx, curSelected, vals) {
+                if ( curSelected < 0) {
+                    return
+                }
+                var name = tr.getElementsByTagName('td')[0].innerText
+                getDashboard(name)
+                $('#dash_saveas').val(name)
+            }})
+
+    $('#tabs').tabs( "option", "heightStyle", "fill" )
+}
+function loadAllDashboards() {
+    callws('/dashboard/getall_dashboards/',"", loadAllDashboardCB, {})
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function deleteDashboard(name) {
+    var ctx = {name: name}
+    callws('/dashboard/delete_dashboard/',"", loadAllDashboardCB, ctx)
+}
+
+</script>

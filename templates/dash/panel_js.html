@@ -1,0 +1,70 @@
+<!--
+    This file is included in the index.html file.
+    It contains the javascript code for the panel.
+-->
+<script>
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function refreshPanelContents(ele) {
+    jcfg = $(ele).data('cfg')
+    if ( !jcfg) {
+        salert("No configuration!!! ", 'btn-warning')
+        return 
+    }
+    // #1. Set the panel Title
+    $(ele).find("#paneltitle").html( jcfg['title'] || "." )
+    var action = jcfg['action'] || ""
+    action = action.split("|")[0].toLowerCase()
+    
+    var content = $(ele).find(".gridcard")
+    //console.log("Refresh action", action)
+
+    switch (action){
+        case "3d": 
+                showSTL(ele); 
+                break;
+        case "html": 
+                let html
+                eval("html=`" + jcfg['html'] +"`") 
+                content.html(html)
+                if (jcfg['refresh_func']) {
+                    jcfg['refresh_func'](ele)
+                }
+                break;
+        case "url":
+            var val = `<iframe src="${jcfg['url']}" width="100%" height="100%" frameborder="0"></iframe>`
+            content.html(val)
+            break;
+        case "data": 
+                updateData(ele); 
+                break;
+        default:
+            console.log("Unknown action", action)
+            break
+    }
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const STLDIV=`
+<p id="bb" style="font-size: x-small;margin-top:0; margin-bottom:0;float: left; "></p>
+<p id="mouse" style="font-size: x-small; margin-top:0; margin-bottom:0; float: right; ">MOUSE</p>
+<div class="stlviewer" data-src="/static/stlviewer/stls/orion_nofbc.stl"></div>
+`
+var stlv
+function showSTL(ele, stlfile) {
+    var jcfg = $(ele).data('cfg')
+    var gridcard = $(ele).find(".gridcard")
+    $(gridcard).html(STLDIV) 
+
+    let v = $(gridcard).find(".stlviewer")
+    stlv =  new STLViewer(v, jcfg.stlfile );
+
+    /*
+    for (var s in jcfg.stls){
+        s = jcfg.stls[s]
+        let v = $(gridcard).find(".stlviewer")
+        stlv =  new STLViewer(v, s.stlfile );
+        jcfg.stlv = stlv;
+        break;
+    }
+    */
+}
+</script>

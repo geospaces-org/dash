@@ -3,6 +3,7 @@
     position: fixed;
     bottom: 0;
     right: 0;
+    font-size: x-small;
 }
 .configure {
     position: fixed;
@@ -28,31 +29,9 @@
     height: auto;
     flex-grow: 1;
 }
-.btn-xsm {
-    font-size: x-small;
-}
-
-.flex-container{
-    display: flex;
-    flex-flow: column;
-    height: 80%;
-}
-.flex-container .header{
-    flex: 0 1 auto;
-    background: #7e8aa0;
-}
-.flex-container .content{
-    flex: 1 1 auto;
-    bbackground: #dbdfe7;
-    overflow: auto;
-}
-.flex-container .footer{
-    flex: 0 1 30px;
-    background: #7e8aa0;
-}
 </style>
 
-<div id="configure" class="configure  flex-container" style="display: none1;" >
+<div id="configure" class="configure  fcontainer" style="display: none1; height: 80%;" >
     <div class="header"></div>
     <div class="content" id="tabledatest" >
         <div id="tabs" class="tabs header" style="height:0%; flex: 0 1 auto; background: #7e8aa0;">
@@ -60,34 +39,27 @@
                 <li><a href="#tabs1" >Panel</a></li>
                 <li><a href="#tabs3" >HTML</a></li>
                 <li><a href="#tabs4" >Data</a></li>
-                <li><a href="#tabs2" >Charts</a></li>
-                <li><a href="#tabs5" >Dash</a></li>
                 <li><a href="#tabs6" >Load</a></li>
+                <li><a href="#tabs5" >Save</a></li>
             </ul>
 <div id="tabs1" >
 <textarea class="input1 c100" style="height:100%;" rows=6 id="gridparms"  placeholder="">{
         title: 'Panel Title',
-        action: '3D|html|data|url',
+        action: 'data|3D|html|url',
         refresh: 0,         
         refresh_func: null, 
 
-        // STLs configuration
-        stlfile: '/static/stlviewer/stls/hook.stl',
-        //
-        url: '',
-        //
-        html: `
-            <img src="/static/imgs/stream.png" height="20%"/> <hr/>
-            <center><font style='font-size: 100px; padding: 15px;'>457</font></center>
-        `,
+        // stlfile: '/static/stlviewer/stls/hook.stl',
+        // url: '',
+        // html: `<img src="/static/imgs/stream.png" height="20%"/> <hr/>`,
         //
         data: [
             {
                 name    : 'data1',
-                data_src: '/opt/data/tseries/data/default/a1normal.csv.cfg',
+                data_src: 'default/a1normal.csv.cfg',
                 cols: "time, ALARM.PERIOD, C01.MV",
                 filter: '', 
-                nrows: 1000, 
+                nrows: 100, 
                 action: 'plot1',
                 opts: { height: '100%', onechart: 0, clk: null, dclk: null },
                 display_rows: 10
@@ -95,9 +67,6 @@
         ]
 }
 </textarea> 
-</div>
-<div id="tabs2" >
-    <h3>CHARTS</h3>
 </div>
 <div id="tabs3" >
     <p><b>Example to Embed youtube:</b></p>
@@ -127,36 +96,38 @@ title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; cli
 <div id="tabs4" >
 {% include "dash/plots.html" %}
     <div class="fcontainer" >
-        <button  class="btn btn-primary" type="button" onclick="updateDATACHARTS($('#dataparams').val())">Update Data</button>
         <div class="content" style="background: #7e8aa0;">
-
-        <textarea class="input1 c100" style="height: 100%; " rows=6 id="dataparams"  data-toggle="tooltip"   
-                    placeholder="Chart parameters">{
-        data: [
-            {
-                name    : 'data1',
-                data_src: 'default/train.csv.cfg',
-                cols: "time, A1$SYSTEM, A2$CUM",
-                filter: '', 
-                nrows: 100, 
-            },
-            {
-                name    : 'data2',
-                data_src: 'default/test1.csv.cfg',
-                cols: "time, B1$MV, B2$PV",
-                filter: '', 
-                nrows: 100, 
-            }
-        ],
-        dataui:{
-                action: 'showdata|plot1',
-                data: ['data1', 'data2'],
-                opts: { height: '100%', onechart: 0, clk: null, dclk: null },
-                display_rows: 10
-            }
+            <textarea class="input1 c100" style="height: 100%; " rows=6 id="dataparams"  >{
+    data: [
+        {
+            name    : 'data1',
+            data_src: 'default/a1.csv.cfg',
+            cols: "time, ALARM_TOTAL, C01_MV",
+            filter: '', 
+            force: 0,
+            nrows: 100, 
+        },
+        {
+            name    : 'data2',
+            data_src: 'default/a2.csv.cfg',
+            cols: "time, C07_MV, C02_MV",
+            filter: '', 
+            force: 0,
+            nrows: 100, 
+        }
+    ],
+    dataui:{
+            action: 'showdata|plot|plot1|plot2',
+            data: ['data1', 'data2'],
+            opts: { height: '100%', onechart: 0, clk: null, dclk: null },
+            display_rows: 10
+        }
 }
-    </textarea> 
-</div>
+        </textarea> 
+    </div>
+    <div class="footer" style="background: #7e8aa0;">
+        <button  class="btn btn-primary" type="button" onclick="updateDATACFG()">Update Data</button>
+    </div>
 </div>
 </div>    
 
@@ -169,7 +140,7 @@ title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; cli
     </div>
     <button  class="btn btn-success" type="button" onclick="saveDashboard()">Save</button>
     <button  class="btn btn-warning" onclick="loadDashboard($('#saved_dashboard').val())">Load</button>
-    <button  class="btn btn-primary" type="button" onclick="saveDashboardToDisk()">Get</button>
+    <button  class="btn btn-primary" type="button" onclick="saveDashboardJSON()">Get Dashboard</button>
 </div>
 <div id="tabs6" ><div id="dashboards_list" style="overflow: auto;background-color: #dbdfe7;"></div></div>
 
@@ -181,224 +152,82 @@ title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; cli
 </div>
 
 <div id="configure_butt"  class="posfbr" style="display: none1;z-index: 1000;" >
-    <button  class="btn-secondary btn-xsm " type="button" onclick="togglestuff()">^</button>
+    <button  class="btn-secondary" type="button" onclick="togglestuff()">^</button>
 </div>
 <!--
 
 -->
 <script>
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function togglestuff() {
-    $('#configure').toggle()
-}
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function saveDashboardToDisk() {
-    console.log("Save dashboard to disk!")
-    $('#configure').show()
-    var json = getDashboardJSON()
-    $('#saved_dashboard').val(json)   
-
-    $('#tabs').tabs('option', 'active' ,4);
-    salert("Review and choos a name for dashboard and click save!")
-}
-function saveDashboard() {
-    var contents = $('#saved_dashboard').val()
-    var name = $('#dash_saveas').val()
-
-    var ctx = { name: name, contents: contents }
-    if (!ctx.name || !ctx.contents) {
-        salert("Name: ${name} or Contents: ${contents} is empty!!", "btn-warning")
-        return;
-    }
-    callws('/dashboard/save_dashboard/',"", loadAllDashboards, ctx)
-}
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function loadDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
-    $('#saved_dashboard').val(responseTxt)
-    GRID.removeAll()
-    loadDashboard(responseTxt)
-}
-function getDashboard(name) {
-    var ctx = { name: name }
-    callws('/dashboard/get_dashboard/',"", loadDashboardCB, ctx)
-}
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function loadAllDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
-    var ds   = JSON.parse(responseTxt);
-    var vals = ds.values;
-    console.log("loadAllDashboardCB", ds)
-    showDataTable(ds, 
-        {   div: '#dashboards_list', id: 'dashboardlist', 
-            maxitems: 5000, fillHeight: 0,
-            rowSelectCB: function(table, tr, indx, curSelected, vals) {
-                if ( curSelected < 0) {
-                    return
-                }
-                var name = tr.getElementsByTagName('td')[0].innerText
-                getDashboard(name)
-                $('#dash_saveas').val(name)
-            }})
-
-    $('#tabs').tabs( "option", "heightStyle", "fill" )
-}
-function loadAllDashboards() {
-    callws('/dashboard/getall_dashboards/',"", loadAllDashboardCB, {})
-}
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function deleteDashboard(name) {
-    var ctx = {name: name}
-    callws('/dashboard/delete_dashboard/',"", loadAllDashboardCB, ctx)
-}
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function updateSTL() {
+function getCleanPanelCfg() {
     var ncfg =  $('#gridparms').val().trim()
-    var stl =  $('#stl').val().trim()
     eval("var cfg= "+ ncfg)
-
-    cfg.action = '3D'
-    delete cfg.stls
     delete cfg.stlfile
     delete cfg.data
+    delete cfg.dataui
     delete cfg.url
     delete cfg.html
-    cfg.stlfile = stl
+    return cfg
+}
+function updateSTL() {
+    cfg = getCleanPanelCfg()
+    cfg.action = '3D'
+    cfg.stlfile = $('#stl').val().trim()
 
     $('#gridparms').val(JSON.stringify(cfg, null, 3))
     setPanelContents(null, JSON.stringify(cfg, null, 3) )
 }
-//~~~~~~~~~~~~~stlfile~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~HTML file~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function updateHTML() {
-    var ncfg =  $('#gridparms').val().trim()
-    var html =  $('#html').val().trim()
-    eval("var cfg= "+ ncfg)
+    cfg = getCleanPanelCfg()
 
     cfg.action = 'html'
-    delete cfg.stls
-    delete cfg.stlfile
-    delete cfg.data
-    delete cfg.url
-    delete cfg.html
-    cfg.html = html
+    cfg.html = $('#html').val().trim()
+
+    $('#gridparms').val(JSON.stringify(cfg, null, 3))
+    setPanelContents(null, JSON.stringify(cfg, null, 3) )
+}
+//~~~~~~~~~~~~~HTML file~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function updateDATACFG() {
+    cfg = getCleanPanelCfg()
+
+    var ncfg = null
+    eval("ncfg = " + $('#dataparams').val().trim())
+
+    cfg.action = 'data'
+    cfg.data = ncfg.data
+    cfg.dataui = ncfg.dataui
 
     $('#gridparms').val(JSON.stringify(cfg, null, 3))
     setPanelContents(null, JSON.stringify(cfg, null, 3) )
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-const DATA_CACHE={}
-
-function cacheDatasetsCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
-    var ds   = JSON.parse(responseTxt);
-    ctx.data = ds
-    DATA_CACHE[ctx.name] = ctx;
-}
-
-function getData(cfg) {
-    var ctx = cfg
-    console.log(cfg)
-    callws('/stream/getdatacfg/',"", cacheDatasetsCB, ctx)
-}
-
-function updateDATACHARTS(cfg) {
-    var ncfg, data_config = null
-    eval("ncfg = " + $('#dataparams').val().trim())
-    console.log(ncfg)
-    for (var d in ncfg.data){
-        data_config = ncfg.data[d]
-        getData(data_config)
-    }
-    updateCHARTS(null, ncfg)
-}
-function charts(cfg, panel){
-    var action = cfg['action'] || 'showtable'
-    action = action.split("|")[0]
-    var card = $(panel).find(".gridcard")
-
-    var dscfg = DATA_CACHE[cfg.data[0]]
-    var ds = dscfg.data
-
-    console.log("==> ACTION", action)
-    switch (action) {
-        case 'plot':
-            showStockChart(ds, card, cfg)
-            break;
-        case 'plot1':
-            showPlot1(ds, card, cfg)
-            break;
-        case 'plot2':
-            showPlot2(ds, card, cfg)
-            break;
-
-        case 'showdata':
-        default:
-            var div = $(card)[0]
-            $(card).html('')
-            showDataTable(ds, {div: div, id: 'paneltabledd1', maxitems: 5000, fillHeight:0})
-            break;
+let TIMERS = {}
+function removeTimer(ele) {
+    if (TIMERS[ele]) {
+        clearInterval(TIMERS[ele])
+        delete TIMERS[ele]
     }
 }
-var CHART_INTERVAL;
-function updateCHARTS(panel, cfg, wait=10) {
-    panel = panel || ACTIVE_GRID_ITEM
-    if ( !panel ) {
-        salert("No panel selected: Select a panel", "btn-warning")
-        return;
+function setTimer(ele, time=0, func=refreshPanelContents) {
+    if ( !ele || time <=0 ) {
+        return
     }
-    //$(panel).find("#config").val()  
-    if ( typeof cfg === "string" ) {
-        eval ("cfg = " + cfg)
+    if (TIMERS[ele]) {
+        clearInterval(TIMERS[ele])
+        delete TIMERS[ele]
     }
-    var d, uicfg = cfg.dataui
-    if ( "data" in uicfg) 
-        for (d in uicfg.data){
-            if (!( uicfg.data[d] in DATA_CACHE)) {
-                console.log("Waiting for =>", d, wait*2, "milli seconds")
-                CHART_INTERVAL=setTimeout(updateCHARTS, wait*2, panel, cfg,wait*10) // wait x ms
-                return
-            }
-        }
-    //=> console.log("OK we have all the data now")
-    charts(uicfg, panel)
+    TIMERS[ele]  = setInterval(function(){ func(ele) },time);
+    return  TIMERS[ele]
+}
+function clearTimers() {
+    for (var e in TIMERS) {
+        clearInterval(TIMERS[ele])
+        delete TIMERS[ele]
+    }
+    TIMERS = []
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function refreshPanelContents(ele) {
-    jcfg = $(ele).data('cfg')
-    if ( !jcfg) {
-        salert("No configuration!!! ", 'btn-warning')
-        return 
-    }
-    // #1. Set the panel Title
-    $(ele).find("#paneltitle").html( jcfg['title'] || "." )
-
-    var action = jcfg['action'].split("|")[0].toLowerCase()
-    var content = $(ele).find(".gridcard")
-
-    console.log("Refresh action", action)
-
-    switch (action){
-        case "3d": 
-                showSTL(ele); 
-                break;
-        case "html": 
-                let html
-                eval("html=`" + jcfg['html'] +"`") 
-                content.html(html)
-                if (jcfg['refresh_func']) {
-                    jcfg['refresh_func'](ele)
-                }
-                break;
-        case "url":
-            var val = `<iframe src="${jcfg['url']}" width="100%" height="100%" frameborder="0"></iframe>`
-            content.html(val)
-            break;
-        case "data": 
-                updateData(ele); 
-                break;
-        default:
-            console.log("Unknown action", action)
-            break
-    }
-}
-
 // This is just a call to all the panels to update itself
 // 
 function updatePanelContents(panel) {
@@ -429,90 +258,7 @@ function setPanelContents(panel, cfg_string=null, update=1) {
     if ( update)
         updatePanelContents(panel)
 }
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-var STLDIV=`
-<p id="bb" style="font-size: x-small;margin-top:0; margin-bottom:0;float: left; "></p>
-<p id="mouse" style="font-size: x-small; margin-top:0; margin-bottom:0; float: right; ">MOUSE</p>
-<div class="stlviewer" data-src="/static/stlviewer/stls/orion_nofbc.stl"></div>
-`
-function showSTL(ele, stlfile) {
-    ele = (ele) ? ele : $(ACTIVE_GRID_ITEM).find(".gridcard")
-    var gridcard = $(ele).find(".gridcard")
-    var jcfg = $(ele).data('cfg')
-
-    if (!stlfile) {
-        var stlfile = $("#stl").val()
-    }
-    $(gridcard).html(STLDIV) 
-    $(".stlviewer").attr("data-src", stlfile)
-    STLViewerEnable("stlviewer", true);
-}
-var stlv
-function showSTL(ele, stlfile) {
-    var jcfg = $(ele).data('cfg')
-    var gridcard = $(ele).find(".gridcard")
-    $(gridcard).html(STLDIV) 
-
-    let v = $(gridcard).find(".stlviewer")
-    stlv =  new STLViewer(v, jcfg.stlfile );
-
-    /*
-    for (var s in jcfg.stls){
-        s = jcfg.stls[s]
-        let v = $(gridcard).find(".stlviewer")
-        stlv =  new STLViewer(v, s.stlfile );
-        jcfg.stlv = stlv;
-        break;
-    }
-    */
-}
 // ---------------------------------------------------------------------------------
-var DATA = null
-DATASETS = {}
-
-function getDatasetsCB1(responseTxt, statusTxt, xhr, ctx={}, formData={}){
-    var ds   = JSON.parse(responseTxt);
-    var vals = ds.values;
-    DATA = ds
-
-    console.log("getDatasetsCB1", ds)
-
-    var panel = ctx['PANEL']
-    var card = $(panel).find(".gridcard")
-
-    if ( !panel ) {
-        salert("No panel selected", "btn-warning")
-        return;
-    }
-    var action = ctx['action'] || 'showtable'
-
-    action = action.split("|")[0]
-    switch (action) {
-
-    case 'plot':
-        showStockChart(ds, card, ctx)
-        break;
-    case 'plot1':
-        showPlot1(ds, card, ctx)
-        break;
-    case 'plot2':
-        showPlot2(ds, card, ctx)
-        break;
-
-    case 'showdata':
-    default:
-        var div = $(card)[0]
-        $(card).html('')
-
-        //var chartDiv = document.createElement(`div`);
-        //div.appendChild(chartDiv);
-        //chartDiv.setAttribute("id", "paneltabled1");
-        //chartDiv.setAttribute("class", "datatable");
-
-        showDataTable(ds, {div: div, id: 'paneltabledd1', maxitems: 5000, fillHeight:0})
-        break;
-    }
-}
 function processWindowURL() {
     var urlp  = new URL(window.location.href)
     var datap =  urlp.searchParams.get('dash')  || ""
@@ -521,7 +267,6 @@ function processWindowURL() {
         // Load dashboard or something
     }
 }
-
 
 $(document).ready(function() {
     loadAllDashboards()

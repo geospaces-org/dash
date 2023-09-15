@@ -174,6 +174,146 @@ function showPlot(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=nul
 
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const DATA_CACHE={}
+
+function cacheDatasetsCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
+    var ds   = JSON.parse(responseTxt);
+    ctx.data = ds
+    DATA_CACHE[ctx.name] = ctx;
+}
+
+function getData(cfg, force=0) {
+    force = cfg.force || force
+    if (!force && DATA_CACHE[cfg.name]) {
+        console.log("Using cached data for", cfg.name)
+        return
+    }
+    console.log(cfg)
+    callws('/stream/getdatacfg/',"", cacheDatasetsCB, cfg)
+}
+
+// force: 0 - use cache, 1 - force reload
+function GET_DATA_CACHE(datacfgArray, force=0) {
+    //console.log(datacfgArray)
+    for (var d in datacfgArray){
+        dconfig = datacfgArray[d]
+        getData(dconfig, force)
+    }
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+function charts(cfg, panel){
+    var action = cfg['action'] || 'showtable'
+    action = action.split("|")[0]
+    var card = $(panel).find(".gridcard")
+
+    var dscfg = DATA_CACHE[cfg.data[0]]
+    var ds = dscfg.data
+
+    console.log("==> ACTION", action)
+    switch (action) {
+        case 'plot':
+            showStockChart(ds, card, cfg)
+            break;
+        case 'plot1':
+            showPlot1(ds, card, cfg)
+            break;
+        case 'plot2':
+            showPlot2(ds, card, cfg)
+            break;
+
+        case 'showdata':
+        default:
+            var div = $(card)[0]
+            $(card).html('')
+            showDataTable(ds, {div: div, id: 'paneltabledd1', maxitems: 5000, fillHeight:0})
+            break;
+    }
+}
+var CHART_INTERVAL;
+function updateUI(panel, cfg, wait=100) {
+    panel = panel || ACTIVE_GRID_ITEM
+    if ( !panel ) {
+        salert("No panel selected: Select a panel", "btn-warning")
+        return;
+    }
+    //$(panel).find("#config").val()  
+    if ( typeof cfg === "string" ) {
+        eval ("cfg = " + cfg)
+    }
+    var d, uicfg = cfg.dataui
+    if ( "data" in uicfg) 
+        for (d in uicfg.data){
+            if (!( uicfg.data[d] in DATA_CACHE)) {
+                var status = `Waiting for Data => ${uicfg.data[d]} ${wait*2} ms`
+                
+                var card = $(panel).find(".gridcard")
+                console.log(status)
+                $(card).html(status)
+
+                CHART_INTERVAL=setTimeout(updateUI, wait, panel, cfg,wait*2) // wait x ms
+                return
+            }
+        }
+    //=> console.log("OK we have all the data now")
+    charts(uicfg, panel)
+}
+
+function updateData(ele){
+    var jcfg = $(ele).data('cfg')
+    var gridcard = $(ele).find(".gridcard")
+    $(gridcard).html("Waiting for Data")     
+
+    GET_DATA_CACHE(jcfg.data)
+
+    //Wait for 100 ms for getting data to be safe
+    setTimeout(updateUI, 100, ele, jcfg)
+}
+/*
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+var DEBUG_DATA = null
+function getDatasetsCB1(responseTxt, statusTxt, xhr, ctx={}, formData={}){
+    var ds   = JSON.parse(responseTxt);
+    var vals = ds.values;
+    DEBUG_DATA = ds
+
+    var panel = ctx['PANEL']
+    var card = $(panel).find(".gridcard")
+
+    if ( !panel ) {
+        salert("No panel selected", "btn-warning")
+        return;
+    }
+    var action = ctx['action'] || 'showtable'
+
+    action = action.split("|")[0]
+    switch (action) {
+
+    case 'plot':
+        showStockChart(ds, card, ctx)
+        break;
+    case 'plot1':
+        showPlot1(ds, card, ctx)
+        break;
+    case 'plot2':
+        showPlot2(ds, card, ctx)
+        break;
+
+    case 'showdata':
+    default:
+        var div = $(card)[0]
+        $(card).html('')
+
+        //var chartDiv = document.createElement(`div`);
+        //div.appendChild(chartDiv);
+        //chartDiv.setAttribute("id", "paneltabled1");
+        //chartDiv.setAttribute("class", "datatable");
+
+        showDataTable(ds, {div: div, id: 'paneltabledd1', maxitems: 5000, fillHeight:0})
+        break;
+    }
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function getDataFromDatasrc(src, cfg = {}, cb) {
     var ctx = cfg
     if (src)   ctx['jcfg'] = src
@@ -181,9 +321,6 @@ function getDataFromDatasrc(src, cfg = {}, cb) {
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function updateData(ele) {
-    console.log("updateData", ele)
-    
-    datasrc1 =  
     datasrc2 =  'default/test1.csv.cfg'
 
     var params  = $('#configure').find('#chartparams').val()
@@ -194,5 +331,5 @@ function updateData(ele) {
     jp['PANEL'] = ACTIVE_GRID_ITEM
     getDataFromDatasrc(null, jp)
 }
-
+*/
 </script>

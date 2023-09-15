@@ -14,14 +14,15 @@
 <style type="text/css">
 .grid-stack {
     padding: 7 0 10 10;height: 100%;
-    display: flex; flex-flow: column; hheight: calc(100vh - 80px)
+    display: flex; flex-flow: column; 
+    /*height: calc(100vh - 80px)*/
  }
 .grid-stack-item-content { 
-    border-radius: 6px;
+    border-radius: 2px;
     box-shadow: 1px 1px 2px #aaaaaa;
     display: flex; 
     flex-flow: column; 
-
+    inset: 2px !important;
 }
 
 .grid-stack-item-content { 
@@ -76,6 +77,8 @@
     text-align: center;
 }
 </style>
+{% include "dash/panel_js.html" %}
+{% include "dash/dashboard_js.html" %}
 {% include "dash/configure.html" %}
 {% include "dash/gridstack.html" %}
 
@@ -207,35 +210,6 @@ function getParentGridItem(ele, depth=25) {
     if(ele.classList.contains('grid-stack-item'))
         return ele
     console.log('Could not find grid-stack-item')
-}
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-let TIMERS = {}
-function removeTimer(ele) {
-    if (TIMERS[ele]) {
-        clearInterval(TIMERS[ele])
-        delete TIMERS[ele]
-    }
-}
-function setTimer(ele, time=3000, func=refreshPanelContents) {
-    if ( !ele || time <=0 ) {
-        return
-    }
-    if (TIMERS[ele]) {
-        clearInterval(TIMERS[ele])
-        delete TIMERS[ele]
-    }
-    TIMERS[ele]  = setInterval(function(){ func(ele) },time);
-    return  TIMERS[ele]
-}
-function clearTimers() {
-    for (var e in TIMERS) {
-        clearInterval(TIMERS[ele])
-        delete TIMERS[ele]
-    }
-    TIMERS = []
-}
-function updatePanelTime(ele) {
-    console.log(ele, "... :)")
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function removeWidget(ele) {

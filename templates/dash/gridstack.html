@@ -13,8 +13,8 @@ function getDashboardJSON() {
 
         var grid = {
             id: gs._id,  x: gs.x, y: gs.y, w: gs.w, h: gs.h,
-            config: $(grid).find("#config").val()
-            //config: $(grid).data('cfg')
+            config: $(grid).find("#config").val(),
+            config: $(grid).data('cfg')
         }
         ALL_GRIDS.push(grid)
     }
@@ -46,7 +46,7 @@ function loadDashboard(json=SAVED_JSON) {
         var grid = gridItems[g]
         var panel= addWidget(grid.x, grid.y, grid.w, grid.h, "", "")
         $(panel).find("#config").val(JSON.stringify(grid.config, null, "  "))
-        $(panel).find("#config").val(grid.config)
+        //$(panel).find("#config").val(grid.config)
         updatePanelContents(panel)
     }
 }
