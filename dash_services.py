@@ -46,7 +46,6 @@ def delete_dashboard(name="", **kwargs):
     os.remove(dst)
 
     return f"Deleted {dst}."
-
 #------------------------------------------------------------------------------
 @webapi("/dashboard/getall_dashboards")
 def getAllDashboards( nrows=10000, patt='*.json', **kwargs):
@@ -60,3 +59,12 @@ def getAllDashboards( nrows=10000, patt='*.json', **kwargs):
         "values": [[f[len(MBASE):]] for f in files][0:nrows]
     }
     return ret
+
+#------------------------------------------------------------------------------
+@webapi("/dashboard/testdash")
+def testdash( t=2, **kwargs):
+    # take a long time to respond back
+    import time
+    t = max( 2, min( int(t), 10))
+    time.sleep( int(t) )
+    return f"Slept for {t} seconds :)"

@@ -1,0 +1,192 @@
+{% extends "common.html" %}
+{% block content %}
+
+<script src="/static/bc/highcharts/highstock.js"></script>
+<script src="/static/bc/highcharts/modules/exporting.js"></script>
+<script src="/static/bc/highcharts/modules/export-data.js"></script>
+<script src="/static/bc/highcharts/modules/parallel-coordinates.js"></script>
+<script src="/static/bc/highcharts/modules/accessibility.js"></script>
+<script src="/static/bc/highcharts/modules/data.js"></script>
+<script src="/static/bc/highcharts/modules/drilldown.js"></script>
+
+{% include "multicharts2.html" %}
+
+<style type="text/css">
+.pagecontent {
+    height: 100%;
+}
+.divcontent { 
+    border-radius: 2px;
+    box-shadow: 4px 4px 4px #aaaaaa;
+    display: inline-block; 
+    flex-flow:column; 
+    background-color: #fff;
+    position: relative;
+}
+.div25 {  width:  25%; height: 25%; }
+.div33 {  width:  33%; height: 33%; }
+.div66 {  width:  66%; height: 33%; }
+.div50 {  width:  49%; height: 49%; }
+.div100{  width:  99%; height: 25%; }
+
+.vw100 {
+    width: 100%;
+    height: 100%;
+}
+
+
+</style>
+<section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
+<div style="text-align: right;">
+    <button  class="btn btn-info btn-lg" type="button" onclick="_testGetData()" >Test1 </button>
+    <button  class="btn btn-info btn-lg" type="button" onclick="_testGetData1()">Test2 </button>
+    <button  class="btn btn-info btn-lg" type="button" onclick="_testGetData3()">Test3 </button>
+</div>
+<hr/>
+<div class="divcontent div100 resizable"><div id=chart1 class="vw100"></div></div><hr/>
+<div class="divcontent div100 resizable"><div id=chart2 class="vw100"></div></div><hr/>
+<div class="divcontent div33  resizable"><div id=chart3 class="vw100"></div></div>
+<div class="divcontent div66  resizable"><div id=chart4 class="vw100"></div></div>
+
+<figure class="highcharts-figure">
+    <div id="container"></div>
+</figure>
+
+</section>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<script>
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// This will return array with date/time, value ex: [ [12-02-02T01:01:01, 3.567], [...], ...]
+function _pieChart( ctx={}, panel="#chart2"){
+    data =  [{
+            name: 'Percentage', colorByPoint: true,
+            data: [   
+                { name: 'Water',   y: 55.02  },
+                { name: 'Fat',  sliced: true, selected: true, y: 26.71 },
+                { name: 'Carbohydrates', y: 1.09  },
+                { name: 'Protein', y: 15.5 },
+                { name: 'Ash', y: 1.68 }
+            ]
+    }]
+
+    // parse the data to match above :)
+
+    copts = _getChart({type: 'pie', title: ctx.title || 'pie', data: data})
+    var chart = Highcharts.chart($(ctx.panel)[0], copts);
+}
+
+function _getDataToPlot(ds, column_index=1){
+    var dsv = ds.values
+    var time_index = Math.max(0, ds.columns.indexOf('time'))
+    ret = []
+    for(u of dsv ) {
+        var t = u[time_index]
+        var tt = !isNaN(t) ? t : new Date(t).getTime() 
+        ret.push([tt, u[column_index]])
+    }
+    return ret
+}
+
+function addDiv(d, name) {
+    var newDiv = document.createElement(`div`);
+    newDiv.className = 'chart';
+    newDiv.setAttribute("id", name || (e.id + "_" + id));
+    //newDiv.setAttribute("style", `height:${height};`);
+    d.appendChild(newDiv);
+    return newDiv
+}
+
+function _lineChart( ctx={}, panel="#chart3", oneChart=true){
+    var data =  [
+            {   name: 'Series1', type: '',  lineWidth: 0.5, type: (ctx.stockChart) ? 'area': "",
+                data: [ [1262304000000, 0.7537 ], [1262563200000, 0.6951 ], [1262649600000, 0.6925],
+        	            [1262736000000, 0.697  ], [1262822400000, 0.6992 ], [1262908800000, 0.7007],
+                    ]
+            },
+            {   name: 'Series2', type: '',  lineWidth: 0.5,
+                data: [ [1262304000000, 0.6537 ], [1262563200000, 0.6951 ], [1262649600000, 0.6925],
+        	            [1262736000000, 0.897  ], [1262822400000, 0.6992 ], [1262908800000, 0.7007],
+                    ]
+            }
+        ]
+
+    // parse the data to match above :)
+    var ds   = JSON.parse(ctx.responseTxt);
+    data[0] = { name: ds.columns[2], data:  _getDataToPlot(ds,2) , type: (ctx.stockChart) ? 'area': ""}
+    data[1] = { name: ds.columns[3], data:  _getDataToPlot(ds,3) }
+
+
+    if ( oneChart) {
+        var copts = _getChart({type: 'spline', title: ctx.title, data: data})
+        var chart = (!ctx.stockChart) ? 
+                Highcharts.chart($(panel)[0], copts) :
+                Highcharts.stockChart($(panel)[0], copts);
+    }
+    else {
+        var p = $(panel)[0];
+        var pn = 0
+        for (var d in data) {
+            var nname = "#" + pn.id +"_" + pn++
+            var ndiv = addDiv(p, nname)
+            var copts = _getChart({type: 'spline', title: ctx.title, data: [data[d]]})
+            Highcharts.chart(ndiv, copts)
+        }
+    }
+}
+
+
+function _parallelAxisChart( ctx={}, panel="#chart2"){
+    var data = [
+            [1012518000000, 5, 2311020, 0, 462180.00, 1, 0],
+            [1012690800000, 5, 2464980, 0, 493020.06, 1, 0],
+            [1012863600000, 4, 1881000, 1, 470280.06, 1, 0],
+            [1014505200000, 4, 1863000, 2, 465780.90, 0, 0],
+            [1014678000000, 1, 2758020, 3, 459659.99, 1, 1],
+            [1214764400000, 3, 2808000, 0, 468000.98, 0, 0]
+        ]
+   var yAxis= [
+            {  type: 'datetime',   labels: { format: '{value:%Y-%m-%d}' } }, 
+            {  min: 0,    tooltipValueFormat: '{value} mile(s)' }, 
+            {  type: 'datetime',   min: 0, labels: { format: '{value:%H:%M}' }},
+            {  categories: [ 'Other', 'Adidas', 'Mizuno', 'Asics', 'Brooks', 'New Balance', 'Izumi' ]}, 
+            {  type: 'datetime' }, 
+            {  categories: ['> 5miles', '< 5miles'] }, 
+            {  categories: ['Before', 'After']      }
+        ]
+    var xAxis =  {
+          categories: [ 'Training data', '#Nodes', 'lr', 'opt', 'epochs', '#Layers', 'Accuracy'],
+          offset: 10
+    }
+    // parse the data to match above :)
+    var ds   = JSON.parse(ctx.responseTxt);
+    var copts = _getChart({type: 'spline', title: ctx.title, data: data})
+    copts.yAxis = yAxis
+    copts.xAxis = xAxis
+    copts.legend = false;
+    copts.series= data.map( function (set, i) { return {  name: ''+i, data: set };})
+    copts.chart.parallelCoordinates = true
+
+    var chart = Highcharts.chart($(panel)[0], copts);
+}
+function _showChart(responseTxt, statusTxt, xhr, ctx={}, formData={}){
+    ctx.responseTxt=responseTxt
+    _pieChart(ctx, '#chart3')
+    _lineChart(ctx,' #chart1', oneChart=false)
+    _parallelAxisChart(ctx,' #chart2')
+    ctx.stockChart = 1
+    _lineChart(ctx,' #chart4', )
+}
+
+function _testGetData3(source="default/a1.csv", panel="#chart3"){
+    cfg = {name: source, data_src: source,  cacheFile: 0, panel: panel, type: "" , std: 1}
+    callws( '/stream/getdatacfg/' ,"", _showChart, cfg )
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+window.onload=function() {} 
+$(document).ready(function() {
+})
+
+
+</script>
+
+{% endblock %}

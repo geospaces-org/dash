@@ -1,17 +1,11 @@
-{% extends "common.html" %}
-{% block content %}
-<script src="/static/bc/highcharts/highcharts.js"></script>
-
+<script src="/static/bc/highcharts/highstock.js"></script>
 <script src="/static/node_modules/gridstack/dist/gridstack-all.js"></script>
 <link href="/static/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet"/>
 
-<script src="/static/stlviewer/three.js/build/three.min.js"></script>
-<script src="/static/stlviewer/three.js/examples/js/WebGL.js"></script>
-<script src="/static/stlviewer/three.js/examples/js/loaders/STLLoader.js"></script>
-<script src="/static/stlviewer/three.js/examples/js/controls/OrbitControls.js"></script>
-<script src="/static/stlviewer/js/stlviewer.js"></script>
-
 <style type="text/css">
+.pagecontent {
+    height: 100%;
+}
 .grid-stack {
     padding: 7 0 10 10;height: 100%;
     display: flex; flex-flow: column; 
@@ -19,10 +13,11 @@
  }
 .grid-stack-item-content { 
     border-radius: 2px;
-    box-shadow: 1px 1px 2px #aaaaaa;
+    box-shadow: 4px 4px 4px #aaaaaa;
     display: flex; 
     flex-flow: column; 
     inset: 2px !important;
+    background-color: #fff;
 }
 
 .grid-stack-item-content { 
@@ -31,14 +26,12 @@
 
 .grid-stack-item-selected {
     border: 2px solid;
-    border-radius: 12px;;
 }
 
 .gridcard-header {
     cursor: move;
     width: 100%;
     padding: 1 10 1 10;
-    bbackground-color: rgba(0,0,0,.09);
 }
 .gridcard-header:hover {
     background-color: rgba(0,0,0,.09);
@@ -53,20 +46,19 @@
     padding: 0 2 0 2;
     flex-grow: 1; 
     width: 100%;
-    hheight: 89%;
     overflow: auto;
 }
 
 .stlviewer {
     width: 100%;
-    height: 89%;
+    height: 88%;
 }
 
 .gridcard0 {
     text-align: left;
 }
 
-.dropdown-item {
+.dropdown-menu {
     font-size: small;
 } 
 
@@ -79,10 +71,8 @@
 </style>
 {% include "dash/panel_js.html" %}
 {% include "dash/dashboard_js.html" %}
-{% include "dash/configure.html" %}
 {% include "dash/gridstack.html" %}
 
-{% include "dash/top.html" %}
 <section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
 <div class="grid-stack">
     <!--
@@ -152,7 +142,7 @@ GRID_TEMPLATE=`
             <a href="#" style="color: #000000; text-decoration: none;" data-toggle="dropdown"> 
                 ...
             </a>
-            <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-menu dropdown-menu-right" style="top: -5px;" >
                 <a class="dropdown-item" onclick='removeWidget(this)' >Remove</a>
                 <a class="dropdown-item" onclick="updatePanelContents(getParentGridItem(this))">Refresh</a>
                 <a class="dropdown-item" onclick="toggleconfig(this)">toggle Config</a>
@@ -168,7 +158,7 @@ GRID_TEMPLATE=`
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
     allowfullscreen>
     </iframe -->
-    -- STUFF -- 
+    CONTENTS 
 </div>
 `
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -214,9 +204,11 @@ function getParentGridItem(ele, depth=25) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function removeWidget(ele) {
     ele = getParentGridItem(ele)
-    if ( ele )
+    if ( ele ) {
         GRID.removeWidget(ele)
-        removeTimer(ele)
+        if ( typeof(removeTimer) !== 'undefined' )
+            removeTimer(ele)
+    }
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 var items = [
@@ -235,9 +227,5 @@ window.onload=function() {
 } 
 
 $(document).ready(function() {
-    addWidget()
-    toggleSelectPanel()
 })
 </script>
-
-{% endblock %}

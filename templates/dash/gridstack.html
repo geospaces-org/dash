@@ -23,9 +23,9 @@ function getDashboardJSON() {
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 var last=0
-function addWidget(x=last++*6, y=0, w=6, h=4, title="", content="") {
-    var html = GRID_TEMPLATE;
-    html=html.replace('Title', title || "Panel "+last);
+function addWidget(title="", content=" ", x=last++*6, y=0, w=6, h=3) {
+    var html = GRID_TEMPLATE; 
+    html=html.replace('Title', title || " "); 
     
     if  (content)
         html=html.replace('CONTENTS', content);
@@ -33,7 +33,6 @@ function addWidget(x=last++*6, y=0, w=6, h=4, title="", content="") {
         html=html.replace('CONTENTS', frames[last%frames.length]);
     
     var g = GRID.addWidget( {x:x, y:y, w:w, h:h, auto_position: true, content: html} ) 
-    toggleSelectPanel()
     return g
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,7 +43,7 @@ function loadDashboard(json=SAVED_JSON) {
 
     for (var g in gridItems) {
         var grid = gridItems[g]
-        var panel= addWidget(grid.x, grid.y, grid.w, grid.h, "", "")
+        var panel= addWidget("", "", grid.x, grid.y, grid.w, grid.h)
         $(panel).find("#config").val(JSON.stringify(grid.config, null, "  "))
         //$(panel).find("#config").val(grid.config)
         updatePanelContents(panel)

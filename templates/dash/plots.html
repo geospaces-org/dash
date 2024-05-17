@@ -7,7 +7,7 @@
     SCRIPT
 ------------------------------------------------------------------------------- -->
 <script>
-function myParseDate(d) {
+function parseDate(d) {
     if (typeof(d) == "string" && d.startsWith('#'))
         d = $(d).val()
 
@@ -36,7 +36,7 @@ function showStockChart(ds,  panel="#chartcontainer", trend=0, ){
     var dsv= ds.values;
     var data=[]
     for (i=0; i < dsv.length; i++) {
-        var ttm = myParseDate(dsv[i][0])
+        var ttm = parseDate(dsv[i][0])
         data.push([ttm,dsv[i][1] ])
     }
     if ( data[0][0] > data[data.length-1][0])
@@ -44,18 +44,6 @@ function showStockChart(ds,  panel="#chartcontainer", trend=0, ){
 
     chart = Highcharts.stockChart($(panel)[0], {
         credits: false,
-        rangeSelector: {  selected: 0,
-            buttons: [
-                {type: 'day',   count: 1,  text: '1D' },
-                {type: 'day',   count: 5,  text: '5D' },
-                {type: 'month', count: 1,  text: '1m' },
-                {type: 'month', count: 3,  text: '3m' },
-                {type: 'month', count: 6,  text: '6m' },
-                {type: 'ytd',   text: 'YTD'           },
-                {type: 'year',  count: 1,  text: '1y' },
-                {type: 'all',   text: 'All'           }
-            ]
-        },
         title:         { text: '' },
         tooltip: {
             valueDecimals: 3
@@ -92,7 +80,7 @@ function showPlot1(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=nu
     var data= {};     data.xData = [];
     var lastKnownTime = null
     for(var i=0; i<dsv.length; i++){
-        var ttm = myParseDate(dsv[i][0])
+        var ttm = parseDate(dsv[i][0])
         if (lastKnownTime == null)
             lastKnownTime = ttm
         else if ( lastKnownTime >= ttm ){
@@ -137,6 +125,7 @@ function showPlot2(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=nu
     //mcharts[0].yAxis[0].update({min:0})
 }
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
 sdata = {
     name: 'Chart', valueDecimals   : 4   , id: "ascore", turboThreshold:15000, 
     type: '', color: '',
@@ -173,13 +162,14 @@ function showPlot(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=nul
     var chart = Highcharts.chart($(panel)[0], hopts);
 
 }
+*/
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const DATA_CACHE={}
 
 function cacheDatasetsCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
     var ds   = JSON.parse(responseTxt);
     ctx.data = ds
-    DATA_CACHE[ctx.name] = ctx;
+    DATA_CACHE[ctx.name || ctx.data_src ] = ctx;
 }
 
 function getData(cfg, force=0) {
@@ -201,7 +191,6 @@ function GET_DATA_CACHE(datacfgArray, force=0) {
     }
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 function charts(cfg, panel){
     var action = cfg['action'] || 'showtable'
     action = action.split("|")[0]
