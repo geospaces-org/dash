@@ -5,10 +5,6 @@
 -->
 <script>
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function togglestuff() {
-    $('#configure').toggle()
-}
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function saveDashboardJSON() {
     console.log("Save dashboard to disk!")
     $('#configure').show()
@@ -47,6 +43,7 @@ function loadAllDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
     showDataTable(ds, 
         {   div: '#dashboards_list', id: 'dashboardlist', 
             maxitems: 5000, fillHeight: 0,
+            tableclass: "none",
             rowSelectCB: function(table, tr, indx, curSelected, vals) {
                 if ( curSelected < 0) {
                     return

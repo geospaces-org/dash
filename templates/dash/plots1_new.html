@@ -1,0 +1,176 @@
+
+<script src="/static/bc/highcharts/modules/exporting.js"></script>
+<script src="/static/bc/highcharts/modules/export-data.js"></script>
+<script src="/static/bc/highcharts/modules/parallel-coordinates.js"></script>
+<script src="/static/bc/highcharts/modules/accessibility.js"></script>
+<script src="/static/bc/highcharts/modules/data.js"></script>
+<script src="/static/bc/highcharts/modules/drilldown.js"></script>
+{% include "multicharts2.html" %}
+
+<script>
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function _parallelAxisChart( ctx={}, panel="#chart2"){
+    var data = [
+            [1012518000000, 5, 2311020, 0, 462180.00, 1, 0],
+            [1012690800000, 5, 2464980, 0, 493020.06, 1, 0],
+            [1012863600000, 4, 1881000, 1, 470280.06, 1, 0],
+            [1014505200000, 4, 1863000, 2, 465780.90, 0, 0],
+            [1014678000000, 1, 2758020, 3, 459659.99, 1, 1],
+            [1214764400000, 3, 2808000, 0, 468000.98, 0, 0]
+        ]
+    var yAxis= [
+            {  type: 'datetime',   labels: { format: '{value:%Y-%m-%d}' } }, 
+            {  min: 0,    tooltipValueFormat: '{value} mile(s)' }, 
+            {  type: 'datetime',   min: 0, labels: { format: '{value:%H:%M}' }},
+            {  categories: [ 'Other', 'Adidas', 'Mizuno', 'Asics', 'Brooks', 'New Balance', 'Izumi' ]}, 
+            {  type: 'datetime' }, 
+            {  categories: ['> 5miles', '< 5miles'] }, 
+            {  categories: ['Before', 'After']      }
+        ]
+    var xAxis =  {
+            categories: [ 'Training data', '#Nodes', 'lr', 'opt', 'epochs', '#Layers', 'Accuracy'],
+            offset: 10
+    }
+    // parse the data to match above :)
+    var copts = _getChart({type: 'spline', title: ctx.title, data: data})
+    copts.yAxis = yAxis
+    copts.xAxis = xAxis
+    copts.legend = false;
+    copts.series= data.map( function (set, i) { return {  name: ''+i, data: set };})
+    copts.chart.parallelCoordinates = true
+    var chart = Highcharts.chart($(panel)[0], copts);
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// This will return array with date/time, value ex: [ [12-02-02T01:01:01, 3.567], [...], ...]
+function _pieChart( ctx={}, panel="#chart2"){
+    data =  [{
+            name: 'Percentage', colorByPoint: true,
+            data: [   
+                { name: 'Water',   y: 55.02  },
+                { name: 'Fat',  sliced: true, selected: true, y: 26.71 },
+                { name: 'Carbohydrates', y: 1.09  },
+                { name: 'Protein', y: 15.5 },
+                { name: 'Ash', y: 1.68 }
+            ]
+    }]
+    // parse the data to match above :)
+    copts = _getChart({type: 'pie', title: ctx.title || 'pie', data: data})
+    var chart = Highcharts.chart($(panel)[0], copts);
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// This will return array with date/time, value ex: [ [12-02-02T01:01:01, 3.567], [...], ...]
+function _barChart( ctx={}, panel="#chart2"){
+    data =  [{
+            name: '', colorByPoint: true,
+            data: [   
+                { name: 'Water',   y: 55.02  },
+                { name: 'Fat',  sliced: true, selected: true, y: 26.71 },
+                { name: 'Carbohydrates', y: 1.09  },
+                { name: 'Protein', y: 15.5 },
+                { name: 'Ash', y: 1.68 }
+            ],
+            dataLabels: {
+                enabled: false,
+            }
+    }]
+    // parse the data to match above :)
+    var xAxis = {type: 'category'}
+    copts = _getChart({type: 'column', title: ctx.title, data: data,xAxis: xAxis})
+    var chart = Highcharts.chart($(panel)[0], copts);
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function _getDataToPlot(ds, column_index=1){
+    var dsv = ds.values
+    var time_index = Math.max(0, ds.columns.indexOf('time'))
+    ret = []
+    for(u of dsv ) {
+        var t = u[time_index]
+        var tt = !isNaN(t) ? t : new Date(t).getTime() 
+        ret.push([tt, u[column_index]])
+    }
+    return ret
+}
+function addDiv(d, name) {
+    var newDiv = document.createElement(`div`);
+    newDiv.className = 'chart';
+    newDiv.setAttribute("id", name || (e.id + "_" + id));
+    //newDiv.setAttribute("style", `height:${height};`);
+    d.appendChild(newDiv);
+    return newDiv
+}
+
+function _lineChart( ctx={}, panel="#chart3"){
+    var data =  [
+            {   name: 'Series1', type: '',  lineWidth: 0.5, type: (ctx.stockChart) ? 'area': "",
+                data: [ [1262304000000, 0.7537 ], [1262563200000, 0.6951 ], [1262649600000, 0.6925],
+        	            [1262736000000, 0.697  ], [1262822400000, 0.6992 ], [1262908800000, 0.7007],
+                    ]
+            },
+            {   name: 'Series2', type: '',  lineWidth: 0.5,
+                data: [ [1262304000000, 0.6537 ], [1262563200000, 0.6951 ], [1262649600000, 0.6925],
+        	            [1262736000000, 0.897  ], [1262822400000, 0.6992 ], [1262908800000, 0.7007],
+                    ]
+            }
+        ]
+
+    // parse the data to match above :)
+    var ds = ctx.ds;
+    var ty = (ctx.stockChart) ? 'area': ""
+
+    data = []
+    for (var i=1; i < ds.columns.length; i++) {
+        ch1 = { name: ds.columns[i], data:  _getDataToPlot(ds,i) , type: ty}
+        data.push(ch1)
+    }
+
+
+    var opts =  ctx.chart_opts || {}
+    var legd =  {enabled: data.length > 1}
+    var chart= null
+    if ( !opts.multiCharts) {
+        
+        var copts = _getChart({type: 'spline', title:opts.title, data: data, legend: legd})
+
+        chart = (!opts.stockChart) ? 
+                Highcharts.chart($(panel)[0], copts) :
+                Highcharts.stockChart($(panel)[0], copts);
+    }
+    else {
+        var p = $(panel)[0];
+        var pn = 0
+        for (var d in data) {
+            var nname = "#" + pn.id +"_" + pn++
+            var ndiv = addDiv(p, nname)
+            var copts = _getChart({type: 'spline', title: opts.title, data: [data[d]], legend:0})
+            chart = Highcharts.chart(ndiv, copts)
+        }
+    }
+    //$(panel).highChart = chart
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function showPlot3(ds, panel, ctx) {
+    $(panel).html('')
+
+    var opts = ctx.chart_opts || {};
+    ctx.chart_opts = opts 
+    var ctype= (opts.type) ? opts.type.split()[0] : "line"
+
+    switch (ctype) {
+        case 'parallel':    
+                _parallelAxisChart({}, panel)
+                break;
+        case 'pie':  
+                _pieChart({}, panel)
+                break;
+        case 'bar':  
+                _barChart({}, panel)
+                break;
+        default:
+                ctx.ds = ds
+                _lineChart(ctx, panel)
+                break
+    }
+    //console.log(ctx)
+}
+
+</script>

@@ -3,7 +3,6 @@
 <div class="resizable" id="chartcontainer" style="background-color: snow;"> </div>
 {% include "multicharts.html" %}
 {% include "multicharts1.html" %}
-{% include "dash/plots1_new.html" %}
 <!-- -----------------------------------------------------------------------------
     SCRIPT
 ------------------------------------------------------------------------------- -->
@@ -120,18 +119,57 @@ function showPlot2(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=nu
     var sdsv  = { name: ds.columns[1], data: dd1, color: 'green'}
     var hopts = getHighChart("score", sdsv, 1, clk);
     var chart = Highcharts.chart($(panel)[0], hopts);
+
+    //mcharts.push(chart)
+    //Addsync($(panel)[0])
+    //mcharts[0].yAxis[0].update({min:0})
 }
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
+sdata = {
+    name: 'Chart', valueDecimals   : 4   , id: "ascore", turboThreshold:15000, 
+    type: '', color: '',
+    flags_data: null,      allowPointSelect: true,
+
+    marker: {
+        enabled: true, radius: 1,
+        states: {
+            hover: {fillColor: 'red', lineWidth: 1, radius: 3 },
+            select:{color: 'firebrick', fillColor: 'firebrick',radius: 3, }
+        }
+    },
+    data : [[0, 43934], [1000,52503], [2000,57177], [3000,69658], [4000,97031]],
+}
+function showPlot(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=null) {
+    $(panel).html('')
+    var dsv = ds.values;
+    var nvs=[]
+    var lastTT = null
+    for (i=0; i < dsv.length; i++) {
+        var ntm = (typeof(dsv[i][0]) === "number")? dsv[i][0] : dsv[i][0].replace('T', ' ') + " GMT"
+        var tt  = new Date(ntm).getTime()
+        
+        if (lastTT == null)
+            lastTT = tt
+        else if ( lastTT >= tt ){
+            console.log("** Duplicate Time values!!! ", lastTT, tt, "ignoring this item")
+            //continue
+        }
+        nvs.push([tt,dsv[i][1] ])
+    }
+    sdata.data = nvs;
+    var hopts = getHighChart("CHART Title", sdata, 0,clk);
+    var chart = Highcharts.chart($(panel)[0], hopts);
+
+}
+*/
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function charts(cfg, panel){
-    var ccfg   = cfg.chart_opts || {}
-    var action = ccfg.action || 'showtable'
-
+    var action = cfg['action'] || 'showtable'
     action = action.split("|")[0]
     var card = $(panel).find(".gridcard")
 
-    var ctx  = cfg.data[0]
-    var name = (typeof(ctx) == 'string') ? ctx: (ctx.name || ctx.data_src )
-    var dscfg = DATA_CACHE[name]
+    var dscfg = DATA_CACHE[cfg.data[0]]
     var ds = dscfg.data
 
     console.log("==> ACTION", action)
@@ -145,22 +183,76 @@ function charts(cfg, panel){
         case 'plot2':
             showPlot2(ds, card, cfg)
             break;
-        case 'plot3':
-            showPlot3(ds, card, cfg)
-            break;
 
         case 'showdata':
         default:
             var div = $(card)[0]
             $(card).html('')
-            showDataTable(ds, 
-                    {   div: div, 
-                        id: 'paneltabledd1', 
-                        maxitems: 5000, 
-                        fillHeight:0,
-                        tableclass: "none"
-                    })
+            showDataTable(ds, {div: div, id: 'paneltabledd1', maxitems: 5000, fillHeight:0})
             break;
     }
 }
+/*
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+var DEBUG_DATA = null
+function getDatasetsCB1(responseTxt, statusTxt, xhr, ctx={}, formData={}){
+    var ds   = JSON.parse(responseTxt);
+    var vals = ds.values;
+    DEBUG_DATA = ds
+
+    var panel = ctx['PANEL']
+    var card = $(panel).find(".gridcard")
+
+    if ( !panel ) {
+        salert("No panel selected", "btn-warning")
+        return;
+    }
+    var action = ctx['action'] || 'showtable'
+
+    action = action.split("|")[0]
+    switch (action) {
+
+    case 'plot':
+        showStockChart(ds, card, ctx)
+        break;
+    case 'plot1':
+        showPlot1(ds, card, ctx)
+        break;
+    case 'plot2':
+        showPlot2(ds, card, ctx)
+        break;
+
+    case 'showdata':
+    default:
+        var div = $(card)[0]
+        $(card).html('')
+
+        //var chartDiv = document.createElement(`div`);
+        //div.appendChild(chartDiv);
+        //chartDiv.setAttribute("id", "paneltabled1");
+        //chartDiv.setAttribute("class", "datatable");
+
+        showDataTable(ds, {div: div, id: 'paneltabledd1', maxitems: 5000, fillHeight:0})
+        break;
+    }
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function getDataFromDatasrc(src, cfg = {}, cb) {
+    var ctx = cfg
+    if (src)   ctx['jcfg'] = src
+    callws('/stream/getdatacfg/',"", cb || getDatasetsCB1, ctx)
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function updateData(ele) {
+    datasrc2 =  'default/test1.csv.cfg'
+
+    var params  = $('#configure').find('#chartparams').val()
+
+    if ( typeof(params) == "string")
+        eval( "var jp = " + params)
+    
+    jp['PANEL'] = ACTIVE_GRID_ITEM
+    getDataFromDatasrc(null, jp)
+}
+*/
 </script>

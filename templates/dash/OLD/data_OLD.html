@@ -1,0 +1,46 @@
+<script>
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+var CHART_INTERVAL;
+function updateUI(panel, cfg, wait=100) {
+    panel = panel || ACTIVE_GRID_ITEM
+    if ( !panel ) {
+        salert("No panel selected: Select a panel", "btn-warning")
+        return;
+    }
+    //$(panel).find("#config").val()  
+    if ( typeof cfg === "string" ) {
+        eval ("cfg = " + cfg)
+    }
+    console.log(cfg)
+    var d, uicfg = cfg.dataui
+    if ( uicfg && "data" in uicfg) 
+        for (d in uicfg.data){
+            if (!( uicfg.data[d] in DATA_CACHE)) {
+                var status = `Waiting for Data => ${uicfg.data[d]} ${wait*2} ms`
+                
+                var card = $(panel).find(".gridcard")
+                console.log(status)
+                $(card).html(status)
+
+                CHART_INTERVAL=setTimeout(updateUI, wait, panel, cfg,wait*2) // wait x ms
+                return
+            }
+        }
+    //=> console.log("OK we have all the data now")
+    charts(uicfg, panel)
+}
+
+function updateData(ele){
+    var jcfg = $(ele).data('cfg')
+    var gridcard = $(ele).find(".gridcard")
+    $(gridcard).html("Waiting for Data")     
+
+    GET_DATA_CACHE(jcfg.data, ele)
+
+    //Wait for 100 ms for getting data to be safe
+    setTimeout(updateUI, 100, ele, jcfg)
+}
+*/
+
+
+</script>

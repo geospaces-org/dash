@@ -1,20 +1,16 @@
 <style>
-.posfbr{
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    font-size: x-small;
-}
 .configure {
     position: fixed;
     bottom: 0;
     right: 0;
-    width: 50%;
-    height:600px;
-    background: rgba(255, 255, 255, 0.8);
+    width: 60%;
+    height:100%;
+    background: rgba(255, 255, 255, 0.99);
     z-index: 100;
     border: 2px solid;
-}
+    border: 1px solid #ececec;
+    display: none1;
+    padding: 0px;}
 
 .c100 {
     width: 100%;
@@ -29,135 +25,154 @@
     height: auto;
     flex-grow: 1;
 }
-</style>
-
-<div id="configure" class="configure  fcontainer" style="display: none1; height: 80%;" >
-    <div class="header"></div>
-    <div class="content" id="tabledatest" >
-        <div id="tabs" class="tabs header" style="height:0%; flex: 0 1 auto; background: #7e8aa0;">
-            <ul>
-                <li><a href="#tabs1" >Panel</a></li>
-                <li><a href="#tabs3" >HTML</a></li>
-                <li><a href="#tabs4" >Data</a></li>
-                <li><a href="#tabs6" >Load</a></li>
-                <li><a href="#tabs5" >Save</a></li>
-            </ul>
-<div id="tabs1" >
-<textarea class="input1 c100" style="height:100%;" rows=6 id="gridparms"  placeholder="">{
-        title: 'Panel Title',
-        action: 'data|3D|html|url',
-        refresh: 0,         
-        refresh_func: null, 
-
-        // stlfile: '/static/stlviewer/stls/hook.stl',
-        // url: '',
-        // html: `<img src="/static/imgs/stream.png" height="20%"/> <hr/>`,
-        //
-        data: [
-            {
-                name    : 'data1',
-                data_src: 'default/a1normal.csv.cfg',
-                cols: "time, ALARM.PERIOD, C01.MV",
-                filter: '', 
-                nrows: 100, 
-                action: 'plot1',
-                opts: { height: '100%', onechart: 0, clk: null, dclk: null },
-                display_rows: 10
-            },
-        ]
+.texta {
+    width: 100%;
+    text-align: left;
+    padding: 3 0 3 10;
+    background: #fefefe;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-family:   monospace, Courier !important;
+    font-size: 0.7em !important;
 }
-</textarea> 
-</div>
-<div id="tabs3" >
-    <p><b>Example to Embed youtube:</b></p>
-<p style="padding-left: 5px; font-size: smaller;">
-&lt;iframe width="100%" height="315" src="https://www.youtube.com/embed/u2-8W8gEvCo?si=_90yyTZCKBqoFdn2"
-title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
-    </iframe>
-</p>
-<hr/>
-<textarea  class=c100 style="height:40%;" id="html"  placeholder="HTML" >
-    <img src="/static/imgs/stream.png"" height="20%"/>
-    <center>
-    <font style='font-size: 100px; padding: 15px;'>${new Date().toISOString().substring( 11, 19)}</font>
-    </center>
-</textarea>
-<button  class="btn btn-primary" type="button" onclick="updateHTML()">Update HTML</button>
 
-<textarea  class=c100 style="height:10%;" id="stl"  >
-/static/stlviewer/stls/hook.stl
-</textarea>
-<button  class="btn btn-primary" type="button" onclick="updateSTL()">Update STL!</button>
-
-
-
-</div>
-            
-<div id="tabs4" >
+</style>
+{% include "dash/data_cache.html" %}
 {% include "dash/plots.html" %}
-    <div class="fcontainer" >
-        <div class="content" style="background: #7e8aa0;">
-            <textarea class="input1 c100" style="height: 100%; " rows=6 id="dataparams"  >{
+
+<div id="configure" class="configure  fcontainer" >
+    <div class="header" style="background: #ececec; padding: 0 5 10 15;" >
+        <br/>
+        <h3 style="display: inline;"> Configure Dashboard <i style="font-size:24px" class="fa">&#xf080;</i> </h3>
+        <div style="float: right; display: inline;" onclick="toggleConfigureWindow()"> X </div>
+    </div>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~ -->
+    <div class="content" id="tabledatest" >
+        <div id="tabs" class="tabs" >
+            <ul>
+                <li><a href="#tabs5" >Load</a></li>
+                <li><a href="#tabs3" >Data</a></li>
+                <li><a href="#tabs1" >Panel</a></li>
+                <li><a href="#tabs2" >HTML</a></li>
+                <li><a href="#tabs4" >Save</a></li>
+            </ul>
+
+            <div id="tabs5" ><div id="dashboards_list" ></div></div>
+
+            <!--  tabs3 Data  -->
+            <div id="tabs3" >
+                <div class="fcontainer" >
+                    <div class="content" style="background: #7e8aa0;">
+                        <textarea class="texta" style="height: 100%; " rows=6 id="dataparams"  >{
+data: [
+    {
+        name    : 'data1',
+        data_src: 'default/a1.csv.cfg',
+        cols: "time, ALARM_TOTAL, C01_MV",
+        filter: '', 
+        refresh: 0,
+        nrows: 100, 
+    },
+    {
+        name    : 'data2',
+        url     : '/dash/sample_data/?n=1',
+        refresh : 5
+    }
+],
+dataui:{
+        action: 'showdata|plot|plot1|plot2',
+        data: ['data1', 'data2'],
+        opts: { height: '100%', onechart: 0, clk: null, dclk: null },
+        display_rows: 10
+    }
+}
+                    </textarea> 
+                </div>
+                <div class="footer" style="background: #7e8aa0;">
+                    <button  class="btn btn-primary" type="button" onclick="updateDATACFG()">Update Data</button>
+                </div>
+                </div>
+            </div>
+
+            <!--  tabs2 HTML -->
+            <div id="tabs2" >
+                <p><b>Example to Embed youtube:</b></p>
+                <p style="padding-left: 5px; font-size: smaller;">
+                &lt;iframe width="100%" height="315" src="https://www.youtube.com/embed/u2-8W8gEvCo?si=_90yyTZCKBqoFdn2"
+                title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
+                    &lt;/iframe&gt;
+                </p>
+                <hr/>
+                <textarea  class="texta" style="height:40%;" id="html"  placeholder="HTML" >
+&lt;img src="/static/imgs/stream.png"" height="20%"/>
+<center>
+<font style='font-size: 100px; padding: 15px;'>${new Date().toISOString().substring( 11, 19)}</font>
+</center>
+                </textarea>
+                <button  class="btn btn-primary" type="button" onclick="updateHTML()">Update HTML</button>
+                
+                <textarea  class="c100" style="height:10%;" id="stl"  >
+/static/stlviewer/stls/hook.stl
+                </textarea>
+                <button  class="btn btn-primary" type="button" onclick="updateSTL()">Update STL!</button>                
+            </div>
+
+
+            <!--  tabs1 Panel -->
+            <div id="tabs1" >   
+                <textarea class="texta" style="height:90%;" rows=6 id="gridparms"  placeholder="">{
+    title: '&nbsp;',
+    action: 'chart|3D|html|url',
+    refresh: 0,         
+    chart_opts: {
+        action: 'plot3', 
+    },
+    // stlfile: '/static/stlviewer/stls/hook.stl',
+    // url: '',
+    // html: `<img src="/static/imgs/stream.png" height="20%"/> <hr/>`,
+    //
     data: [
         {
-            name    : 'data1',
-            data_src: 'default/a1.csv.cfg',
-            cols: "time, ALARM_TOTAL, C01_MV",
-            filter: '', 
-            force: 0,
-            nrows: 100, 
-        },
-        {
             name    : 'data2',
-            data_src: 'default/a2.csv.cfg',
-            cols: "time, C07_MV, C02_MV",
-            filter: '', 
-            force: 0,
-            nrows: 100, 
+            url     : '/dashboard/sample_data/?n=1',
+            refresh : 0
         }
-    ],
-    dataui:{
-            action: 'showdata|plot|plot1|plot2',
-            data: ['data1', 'data2'],
-            opts: { height: '100%', onechart: 0, clk: null, dclk: null },
-            display_rows: 10
-        }
+    ]
 }
-        </textarea> 
+            </textarea> 
+                <button class="btn btn-primary btn-medium" type="button" onclick="setPanelContents()">Update Panel</button>
+            </div>
+
+            <!--  tabs4 SAVE dashboard-->
+            <div id="tabs4" >       
+                <textarea class="texta" style="height:90%;" rows=6 id="saved_dashboard"  placeholder=""></textarea>
+                <div class="div1" style="display: inline-block;">
+                    <label class=label1 >Enter a name for this dashboard</label>
+                    <input class="input1" id="dash_saveas" size=16 placeholder="save as" value="{{user.username}}.json" required>
+                </div>
+                <button  class="btn btn-success" type="button" onclick="saveDashboard()">Save</button>
+                <button  class="btn btn-warning" onclick="loadDashboard($('#saved_dashboard').val())">Load</button>
+                <button  class="btn btn-primary" type="button" onclick="saveDashboardJSON()">Get Dashboard</button>
+            </div>
+            
+
+        </div>
     </div>
-    <div class="footer" style="background: #7e8aa0;">
-        <button  class="btn btn-primary" type="button" onclick="updateDATACFG()">Update Data</button>
+    
+<!-- ~~~~~~~~~~~~~~~~~~~~~ -->
+    
+
+    <div class="footer">
+        <button class="btn btn-danger btn-medium" type="button"  onclick="toggleConfigureWindow()">Close Panel</button>
     </div>
 </div>
-</div>    
 
-<div id="tabs5" >
-    <textarea class="input1 c100" style="height:80%;" rows=6 id="saved_dashboard"  placeholder="">
-    </textarea>
-    <div class="div1" style="display: inline-block;">
-        <label class=label1 >Enter a name for this dashboard</label>
-        <input class="input1" id="dash_saveas" size=1 placeholder="save as" value="{{user.username}}.json" required>
-    </div>
-    <button  class="btn btn-success" type="button" onclick="saveDashboard()">Save</button>
-    <button  class="btn btn-warning" onclick="loadDashboard($('#saved_dashboard').val())">Load</button>
-    <button  class="btn btn-primary" type="button" onclick="saveDashboardJSON()">Get Dashboard</button>
-</div>
-<div id="tabs6" ><div id="dashboards_list" style="overflow: auto;background-color: #dbdfe7;"></div></div>
-
-</div>
-</div>
-<div class="footer">
-    <button  class="btn btn-primary btn-sm" type="button" onclick="setPanelContents(null, $('#gridparms').val())">Update Panel</button>
-</div>
-</div>
-
-<div id="configure_butt"  class="posfbr" style="display: none1;z-index: 1000;" >
-    <button  class="btn-secondary" type="button" onclick="togglestuff()">^</button>
-</div>
-<!--
-
--->
 <script>
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function toggleConfigureWindow() {
+    $('#configure').toggle()
+}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function getCleanPanelCfg() {
     var ncfg =  $('#gridparms').val().trim()
@@ -175,7 +190,7 @@ function updateSTL() {
     cfg.stlfile = $('#stl').val().trim()
 
     $('#gridparms').val(JSON.stringify(cfg, null, 3))
-    setPanelContents(null, JSON.stringify(cfg, null, 3) )
+    setPanelContents(null, $('#gridparms').val() )
 }
 //~~~~~~~~~~~~~HTML file~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function updateHTML() {
@@ -185,7 +200,7 @@ function updateHTML() {
     cfg.html = $('#html').val().trim()
 
     $('#gridparms').val(JSON.stringify(cfg, null, 3))
-    setPanelContents(null, JSON.stringify(cfg, null, 3) )
+    setPanelContents(null, $('#gridparms').val() )
 }
 //~~~~~~~~~~~~~HTML file~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function updateDATACFG() {
@@ -232,22 +247,32 @@ function clearTimers() {
 // 
 function updatePanelContents(panel) {
     var pcfg = $(panel).find("#config").val().trim() || "{}"
-    if (!pcfg){
-        salert("Configuration is empty!! Nothing to Update", "btn-warning")
-        return;
-    }
-    //var jcfg = JSON.parse(pcfg)
     var jcfg
     eval("jcfg=" +pcfg)
 
     // #3. Set the content
     removeTimer(panel)    // remove if it was set
     $(panel).data('cfg', jcfg)
-    refreshPanelContents(panel)
-    interval = setTimer (panel, jcfg['refresh'], jcfg['refresh_func'] || refreshPanelContents)
+    refreshPanelContents(panel, 1)
+    if ( jcfg['refresh']){
+        interval = setTimer (panel, jcfg['refresh'], refreshPanelContents)
+    }
+    //Set up resource here => data_cache.html
+    if (jcfg.data) {
+        jcfg.panel = panel
+        GET_DATA_CACHE(jcfg.data, panel )
+
+        for (var d in jcfg.data ){
+            var dconfig = jcfg.data[d]
+            
+            if (typeof(dconfig) == 'string') {
+                DashBroadcast(dconfig)
+            }
+        }
+    }
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function setPanelContents(panel, cfg_string=null, update=1) {
+function setPanelContents(panel, cfg_string=$('#gridparms').val(), update=1) {
     panel = panel || ACTIVE_GRID_ITEM
     if ( !panel ) {
         salert("No panel selected: Select a panel", "btn-warning")
@@ -267,11 +292,15 @@ function processWindowURL() {
         // Load dashboard or something
     }
 }
+function tabsByName(id='#tabledatest #tabs', name="#tabs1") {
+    var index = $(`${id} a[href="${name}"]`).parent().index();
+    console.log(id, name, index)
+    $(id).tabs('option', 'active', index);
+}
 
 $(document).ready(function() {
     loadAllDashboards()
-    //$('#tabs').tabs('option', 'active' ,3);
-
+    setTimeout(tabsByName, 100, '#tabledatest #tabs', "#tabs1")
 })
 
 </script>

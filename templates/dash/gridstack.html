@@ -22,8 +22,9 @@ function getDashboardJSON() {
     return SAVED_JSON
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-var last=0
-function addWidget(title="", content=" ", x=last++*6, y=0, w=6, h=3) {
+var last=1
+//function addWidget(title=last, content=" ", x=(last++%2)*6, y=last%3, w=5, h=3) {
+function addWidget(title=last++, content=" ", x=0, y=0, w=5, h=3) {
     var html = GRID_TEMPLATE; 
     html=html.replace('Title', title || " "); 
     
@@ -33,7 +34,10 @@ function addWidget(title="", content=" ", x=last++*6, y=0, w=6, h=3) {
         html=html.replace('CONTENTS', frames[last%frames.length]);
     
     var g = GRID.addWidget( {x:x, y:y, w:w, h:h, auto_position: true, content: html} ) 
+
+    toggleSelectPanel(g)
     return g
+
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function loadDashboard(json=SAVED_JSON) {

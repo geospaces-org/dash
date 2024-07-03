@@ -1,0 +1,81 @@
+<script>
+const DATA_CACHE={}
+/* -------------------------------------------------------------
+{ 
+name    : 'data1',                  url     : '/stream/getdatacfg/',
+data_src: 'default/a1.csv.cfg',     cols    : "time, C01_MV",
+filter  : '',                       nrows   : -100, 
+refresh : 10, # seconds
+}
+*/
+function _dash_getDataCB(responseTxt, statusTxt, xhr, ctx={}){
+    var ds   = JSON.parse(responseTxt);
+    ctx.data = ds
+
+    var name = ctx.name || ctx.data_src
+
+    if ( DATA_CACHE[name ] && DATA_CACHE[name ].timer) {
+        // if this was Duplicate
+        clearInterval(DATA_CACHE[name ].timer)
+    }
+
+    DATA_CACHE[name ] = ctx;
+    if (ctx.refresh > 0) {
+        ctx.timer = setTimeout(_dash_getData, ctx.refresh *1000, ctx)
+    }
+    DashBroadcast(name)
+}
+function _dash_getData(cfg) {
+    callws(cfg.url || '/stream/getdatacfg/',"", _dash_getDataCB, cfg)
+}
+/* -------------------------------------------------------------
+This will get the data from the list of data configuration
+Ex: 
+data: [ data_cfg1, data_cfg2, ...]
+*/
+function GET_DATA_CACHE(datacfgArray, panel=null) {
+    //console.log(datacfgArray)
+    for (var d in datacfgArray){
+        var dconfig = datacfgArray[d]
+        
+        var name = (typeof(dconfig) == 'string') ? dconfig: (dconfig.name || dconfig.data_src )
+        DashRegister(name, panel)
+
+        if ( typeof(dconfig) == 'string' )
+            continue;
+
+        dconfig.panel = panel
+        _dash_getData(dconfig)
+    }
+}
+// -------------------------------------------------------------
+const DASH_REGISTERED = { name: {} }
+function DashRegister(name, panel=null) {
+    if (!panel)
+        return
+
+    console.log(`New registration ${name} ${panel}`)
+    if (!DASH_REGISTERED[name] ) {
+        DASH_REGISTERED[name] = []
+    }
+    for (var i=0; i < DASH_REGISTERED[name].length; i++) {
+        if (DASH_REGISTERED[name][i] == panel){
+            // Already registered
+            return 
+        }
+    }
+    DASH_REGISTERED[name].push(panel)
+}
+// -------------------------------------------------------------
+function DashBroadcast(name) {
+    var items = DASH_REGISTERED[name]
+    if ( !items )
+        return
+    
+    for (var i=0; i < items.length; i++) {
+        var panel  = items[i]
+        refreshPanelContents(panel, 0)
+    }
+}
+</script>
+    

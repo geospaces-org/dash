@@ -2,7 +2,7 @@
 
 #*** DO NOT EDIT - GENERATED FROM tseries/notebooks/tseries_services.ipynb ****
 
-import sys, os,  glob, logging
+import sys, os,  glob, logging, datetime
 from  mangorest.mango import webapi
 
 sys.path.append("../..")
@@ -59,7 +59,6 @@ def getAllDashboards( nrows=10000, patt='*.json', **kwargs):
         "values": [[f[len(MBASE):]] for f in files][0:nrows]
     }
     return ret
-
 #------------------------------------------------------------------------------
 @webapi("/dashboard/testdash")
 def testdash( t=2, **kwargs):
@@ -68,3 +67,16 @@ def testdash( t=2, **kwargs):
     t = max( 2, min( int(t), 10))
     time.sleep( int(t) )
     return f"Slept for {t} seconds :)"
+#------------------------------------------------------------------------------
+@webapi("/dashboard/sample_data")
+def testdash( request, **kwargs):
+    from random import random 
+    n = kwargs.get("n", 1)
+    
+    ts = int(datetime.datetime.now().timestamp()*1000) 
+    ret = {
+        "name": "sample_data",
+        "columns": ["time"] + [ "v{i}" for i in range(n)],
+        "values":  [[ts+i*1000] + [random() for j in range(n)] for i in range(100)]
+    }
+    return ret

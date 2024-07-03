@@ -4,7 +4,7 @@
 -->
 <script>
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function refreshPanelContents(ele) {
+function refreshPanelContents(ele, first_time=0) {
     jcfg = $(ele).data('cfg')
     if ( !jcfg) {
         salert("No configuration!!! ", 'btn-warning')
@@ -20,7 +20,7 @@ function refreshPanelContents(ele) {
 
     switch (action){
         case "3d": 
-                showSTL(ele); 
+                showSTL(ele, first_time); 
                 break;
         case "html": 
                 let html
@@ -34,13 +34,54 @@ function refreshPanelContents(ele) {
             var val = `<iframe src="${jcfg['url']}" width="100%" height="100%" frameborder="0"></iframe>`
             content.html(val)
             break;
-        case "data": 
-                updateData(ele); 
+        case "chart": 
+                // Dont do anything first time, wait for data
+                // broadcast will you
+                if (!first_time) {
+                    if ( $(content).highcharts && $(content).highcharts() ) {
+                        console.log("Update the new points ...")
+                        updateData2(ele); 
+                    } else {
+                        updateData1(ele, first_time); 
+                    }
+                } else {
+                    if ( $(content).highcharts && $(content).highcharts() ) {
+                        $(content).highcharts().destroy()
+                        console.log("First time, secondtime?Highcharts must be deleted!! ...")
+                        $(content).html("Waiting for data!") 
+                    }
+                }
                 break;
         default:
             console.log("Unknown action", action)
             break
     }
+}
+function updateData1(ele){
+    var jcfg = $(ele).data('cfg')
+    var content = $(ele).find(".gridcard")
+    $(content).html("Waiting for Data")     
+    charts(jcfg, ele)
+}
+
+function updateData2(ele){
+    console.log("Update the new points updateData2() ...")
+    var jcfg = $(ele).data('cfg')
+    var content = $(ele).find(".gridcard")
+    var hc = $(content).highcharts()
+
+    var ctx  = jcfg.data[0]
+    var name = (typeof(ctx) == 'string') ? ctx: (ctx.name || ctx.data_src )
+    var dscfg = DATA_CACHE[name]
+    var ds = dscfg.data
+
+    for (var s=0; s < hc.series.length; s++ ) {
+        var sr = hc.series[s]
+        var nd = _getDataToPlot(ds, s+1)
+        //sr.setData(nd)
+        sr.addPoint(nd[nd.length-1], true, true)
+    }
+
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const STLDIV=`
@@ -49,13 +90,14 @@ const STLDIV=`
 <div class="stlviewer" data-src="/static/stlviewer/stls/orion_nofbc.stl"></div>
 `
 var stlv
-function showSTL(ele, stlfile) {
+function showSTL(ele, firsttime=0) {
     var jcfg = $(ele).data('cfg')
     var gridcard = $(ele).find(".gridcard")
     $(gridcard).html(STLDIV) 
 
     let v = $(gridcard).find(".stlviewer")
-    stlv =  new STLViewer(v, jcfg.stlfile );
+    if ( firsttime)
+        stlv =  new STLViewer(v, jcfg.stlfile );
 
     /*
     for (var s in jcfg.stls){
