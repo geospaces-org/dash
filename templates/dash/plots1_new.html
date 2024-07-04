@@ -5,11 +5,13 @@
 <script src="/static/bc/highcharts/modules/accessibility.js"></script>
 <script src="/static/bc/highcharts/modules/data.js"></script>
 <script src="/static/bc/highcharts/modules/drilldown.js"></script>
+<link  href="/static/bc/highcharts/dashboards/css/dashboards.css" rel="stylesheet"/>
+
 {% include "multicharts2.html" %}
 
 <script>
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function _parallelAxisChart( ctx={}, panel="#chart2"){
+function _parallelAxisChart( ds, ctx={}, panel="#chart2", first_time=1){
     var data = [
             [1012518000000, 5, 2311020, 0, 462180.00, 1, 0],
             [1012690800000, 5, 2464980, 0, 493020.06, 1, 0],
@@ -42,7 +44,7 @@ function _parallelAxisChart( ctx={}, panel="#chart2"){
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // This will return array with date/time, value ex: [ [12-02-02T01:01:01, 3.567], [...], ...]
-function _pieChart( ctx={}, panel="#chart2"){
+function _pieChart( ds, ctx={}, panel="#chart2", first_time=1){
     data =  [{
             name: 'Percentage', colorByPoint: true,
             data: [   
@@ -59,23 +61,58 @@ function _pieChart( ctx={}, panel="#chart2"){
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // This will return array with date/time, value ex: [ [12-02-02T01:01:01, 3.567], [...], ...]
-function _barChart( ctx={}, panel="#chart2"){
-    data =  [{
-            name: '', colorByPoint: true,
-            data: [   
-                { name: 'Water',   y: 55.02  },
-                { name: 'Fat',  sliced: true, selected: true, y: 26.71 },
-                { name: 'Carbohydrates', y: 1.09  },
-                { name: 'Protein', y: 15.5 },
-                { name: 'Ash', y: 1.68 }
+function getRandomData(n=10, data1=[]) {
+    for (var i=0; n > data1.length; i++) {
+        data1.push({name: ""+ new Date().getTime()+i, y: Math.round(Math.random() *10)})
+    }
+    return data1    
+}
+var BARDATA= null
+function _barChart( ds, ctx={}, panel="#chart2", first_time=1){
+    var data1 = getRandomData(10)
+
+    if ( !BARDATA) {
+        BARDATA = data1
+    } else{
+        var n = BARDATA.pop()
+        BARDATA = getRandomData(BARDATA.length+1, BARDATA)
+        data1 = BARDATA
+    }
+    
+    var hc = $(panel).highcharts()
+
+    if ( !first_time && hc ) {
+        //console.log("------ UPDATING BAR -----")
+        hc.series[0].addPoint(data1[data1.length-1], true, true)
+        return
+    }
+
+    copts = {
+        title:      {  text:  '', align: 'left'},
+        chart:      {  type: 'column'},
+        credits:    {  enabled: false       },
+        xAxis:      {  type: 'category', labels: {enabled: false}},
+        yAxis:      {  title: {text: 'category'} },
+        legend:     {  enabled: false },
+        plotOptions:{ 
+                        column: {
+                                borderRadius: 0,
+                                groupPadding: 0,
+                                pointPadding: 0,
+                                color: '#3366CC',
+                        },
+                    },
+        series: [{
+                    name: 'Random ',
+                    data: data1,
+                    dataLabels: {  enabled: true,    },
+                    tooltip: {  pointFormat: 'Y: {point.y}/h</b><br> <b>€ z: {point.z} million</b><br>'    },
+                    borderRadius: 3,
+                    colorByPoint: false,
+                }
             ],
-            dataLabels: {
-                enabled: false,
-            }
-    }]
-    // parse the data to match above :)
-    var xAxis = {type: 'category'}
-    copts = _getChart({type: 'column', title: ctx.title, data: data,xAxis: xAxis})
+    }
+    //console.log(copts)
     var chart = Highcharts.chart($(panel)[0], copts);
 }
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,6 +125,10 @@ function _getDataToPlot(ds, column_index=1){
         var tt = !isNaN(t) ? t : new Date(t).getTime() 
         ret.push([tt, u[column_index]])
     }
+    if ( ret[0][0] > ret[ret.length-1][0] ) {
+        r1 = ret.sort((a,b) => a[0] - b[0])
+
+    }
     return ret
 }
 function addDiv(d, name) {
@@ -98,8 +139,7 @@ function addDiv(d, name) {
     d.appendChild(newDiv);
     return newDiv
 }
-
-function _lineChart( ctx={}, panel="#chart3"){
+function _lineChart( ds, ctx={}, panel="#chart3", first_time=1 ){
     var data =  [
             {   name: 'Series1', type: '',  lineWidth: 0.5, type: (ctx.stockChart) ? 'area': "",
                 data: [ [1262304000000, 0.7537 ], [1262563200000, 0.6951 ], [1262649600000, 0.6925],
@@ -113,18 +153,43 @@ function _lineChart( ctx={}, panel="#chart3"){
             }
         ]
 
-    // parse the data to match above :)
-    var ds = ctx.ds;
-    var ty = (ctx.stockChart) ? 'area': ""
+    var opts =  ctx.chart_opts || {}
+    var cols = (opts.columns) ? (("time," + opts.columns).split(/\s+|,/)) : ds.columns
 
-    data = []
-    for (var i=1; i < ds.columns.length; i++) {
-        ch1 = { name: ds.columns[i], data:  _getDataToPlot(ds,i) , type: ty}
-        data.push(ch1)
+
+    var hc = $(panel).highcharts()
+    if ( !first_time && hc ) {
+        //console.log("------ UPDATING LINE CHART -----")
+        for (var s=0; s < hc.series.length; s++ ) {
+            var sr = hc.series[s]
+
+            var idx = ds.columns.indexOf(cols[s+1])
+            if ( idx < 0 ) {
+                console.log( col, " <=== INDEX NOT FOUND in DATA!!")
+                continue
+            }
+            var nd = _getDataToPlot(ds, idx)
+            //sr.setData(nd)
+            sr.addPoint(nd[nd.length-1], true, true)
+        }
+        return
     }
 
-
-    var opts =  ctx.chart_opts || {}
+    data = []
+    var ty = (ctx.stockChart) ? 'area': ""
+    
+    for (var i=1; i < cols.length; i++) {
+        var col = cols[i]
+        var idx = ds.columns.indexOf(col)
+        if ( idx < 0 ) {
+            console.log( col, " <=== INDEX NOT FOUND in DATA!!")
+            continue
+        }
+        
+        ch1 = { name: col, data:  _getDataToPlot(ds,idx) , type: ty}
+        data.push(ch1)
+    }
+    
     var legd =  {enabled: data.length > 1}
     var chart= null
     if ( !opts.multiCharts) {
@@ -145,32 +210,27 @@ function _lineChart( ctx={}, panel="#chart3"){
             chart = Highcharts.chart(ndiv, copts)
         }
     }
-    //$(panel).highChart = chart
 }
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function showPlot3(ds, panel, ctx) {
-    $(panel).html('')
-
+function showPlot3(ds, panel, ctx, first_time=0) {
     var opts = ctx.chart_opts || {};
     ctx.chart_opts = opts 
     var ctype= (opts.type) ? opts.type.split()[0] : "line"
 
     switch (ctype) {
         case 'parallel':    
-                _parallelAxisChart({}, panel)
+                _parallelAxisChart(ds, ctx, panel, first_time)
                 break;
         case 'pie':  
-                _pieChart({}, panel)
+                _pieChart(ds, ctx, panel, first_time)
                 break;
         case 'bar':  
-                _barChart({}, panel)
+                _barChart(ds, ctx, panel,first_time)
                 break;
         default:
-                ctx.ds = ds
-                _lineChart(ctx, panel)
+                _lineChart(ds, ctx, panel, first_time)
                 break
     }
-    //console.log(ctx)
 }
 
 </script>

@@ -10,7 +10,7 @@ refresh : 10, # seconds
 */
 function _dash_getDataCB(responseTxt, statusTxt, xhr, ctx={}){
     var ds   = JSON.parse(responseTxt);
-    ctx.data = ds
+    //ctx.data = ds
 
     var name = ctx.name || ctx.data_src
 
@@ -19,7 +19,7 @@ function _dash_getDataCB(responseTxt, statusTxt, xhr, ctx={}){
         clearInterval(DATA_CACHE[name ].timer)
     }
 
-    DATA_CACHE[name ] = ctx;
+    DATA_CACHE[name ] = {context: ctx, data:ds}
     if (ctx.refresh > 0) {
         ctx.timer = setTimeout(_dash_getData, ctx.refresh *1000, ctx)
     }
@@ -44,7 +44,7 @@ function GET_DATA_CACHE(datacfgArray, panel=null) {
         if ( typeof(dconfig) == 'string' )
             continue;
 
-        dconfig.panel = panel
+        //dconfig.panel = panel
         _dash_getData(dconfig)
     }
 }
@@ -54,7 +54,7 @@ function DashRegister(name, panel=null) {
     if (!panel)
         return
 
-    console.log(`New registration ${name} ${panel}`)
+    //console.log(`New registration ${name} ${panel}`)
     if (!DASH_REGISTERED[name] ) {
         DASH_REGISTERED[name] = []
     }
@@ -74,6 +74,7 @@ function DashBroadcast(name) {
     
     for (var i=0; i < items.length; i++) {
         var panel  = items[i]
+        //console.log(`BROADCASTING  ${name} ${panel}`)
         refreshPanelContents(panel, 0)
     }
 }

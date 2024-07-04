@@ -1,23 +1,60 @@
-<!--
+<script>
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     This file is included in the index.html file.
     It contains the javascript code for the panel.
--->
-<script>
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function refreshPanelContents(ele, first_time=0) {
+*/
+function _getAllDataNames(jcfg) {
+    var ret = []
+    if (!jcfg.data) 
+        return ret
+
+    for (var d in jcfg.data){
+        var dcon = jcfg.data[d]
+        var name = (typeof(dcon) == 'string') ? dcon: (dcon.name || dcon.data_src )
+        ret.push(name)
+    }
+    return ret
+}
+function _checkDataReady(jcfg) {
+    var dnames = _getAllDataNames(jcfg)
+    for (var d in dnames){
+        var  name = dnames[d]
+        if ( !DATA_CACHE[name])
+            return false
+    }
+    return true
+}
+
+function refreshPanelContents(ele, first_time=1) {
     jcfg = $(ele).data('cfg')
     if ( !jcfg) {
         salert("No configuration!!! ", 'btn-warning')
         return 
     }
     // #1. Set the panel Title
-    $(ele).find("#paneltitle").html( jcfg['title'] || "." )
+    $(ele).find("#paneltitle").html( jcfg['title'] || "&nbsp;" )
+    var content = $(ele).find(".gridcard")
+
+    //# 2. CLEAN the content if it is first time
+    if ( first_time) {
+        // :Lets clean the panel - first time
+        if ( $(content).highcharts && $(content).highcharts() ) {
+            console.log("Destroying CHARTS ...", first_time, jcfg['title'])
+            $(content).highcharts().destroy()     
+        }   
+    } 
+
+    
+    // CHECK if we have all the reasources ready - otherwise some will call us back
+    var data_config_names = _getAllDataNames(jcfg)
+    if ( !_checkDataReady(jcfg)) {
+        console.log("Waiting for resources ...", first_time, jcfg['title'])
+        $(content).html("Waiting for resources: " + data_config_names)
+        return
+    }
+
     var action = jcfg['action'] || ""
     action = action.split("|")[0].toLowerCase()
-    
-    var content = $(ele).find(".gridcard")
-    //console.log("Refresh action", action)
-
     switch (action){
         case "3d": 
                 showSTL(ele, first_time); 
@@ -35,54 +72,29 @@ function refreshPanelContents(ele, first_time=0) {
             content.html(val)
             break;
         case "chart": 
-                // Dont do anything first time, wait for data
-                // broadcast will you
-                if (!first_time) {
-                    if ( $(content).highcharts && $(content).highcharts() ) {
-                        console.log("Update the new points ...")
-                        updateData2(ele); 
-                    } else {
-                        updateData1(ele, first_time); 
-                    }
-                } else {
-                    if ( $(content).highcharts && $(content).highcharts() ) {
-                        $(content).highcharts().destroy()
-                        console.log("First time, secondtime?Highcharts must be deleted!! ...")
-                        $(content).html("Waiting for data!") 
-                    }
-                }
+                charts(jcfg, ele, first_time)
                 break;
+        case 'showdata':
+            $(content).html('')
+            for (var n in data_config_names) {
+                var nm = data_config_names[n]
+                showDataTable(  DATA_CACHE[nm].data, 
+                                {   div: $(content)[0], 
+                                    id: 'paneltabledd_' + n, 
+                                    maxitems: 5000, 
+                                    fillHeight:0,
+                                    tableclass: "none"
+                                })
+            }
+            break;
+            
         default:
             console.log("Unknown action", action)
             break
+
     }
 }
-function updateData1(ele){
-    var jcfg = $(ele).data('cfg')
-    var content = $(ele).find(".gridcard")
-    $(content).html("Waiting for Data")     
-    charts(jcfg, ele)
-}
 
-function updateData2(ele){
-    console.log("Update the new points updateData2() ...")
-    var jcfg = $(ele).data('cfg')
-    var content = $(ele).find(".gridcard")
-    var hc = $(content).highcharts()
-
-    var ctx  = jcfg.data[0]
-    var name = (typeof(ctx) == 'string') ? ctx: (ctx.name || ctx.data_src )
-    var dscfg = DATA_CACHE[name]
-    var ds = dscfg.data
-
-    for (var s=0; s < hc.series.length; s++ ) {
-        var sr = hc.series[s]
-        var nd = _getDataToPlot(ds, s+1)
-        //sr.setData(nd)
-        sr.addPoint(nd[nd.length-1], true, true)
-    }
-
-}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const STLDIV=`
 <p id="bb" style="font-size: x-small;margin-top:0; margin-bottom:0;float: left; "></p>

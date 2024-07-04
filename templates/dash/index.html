@@ -4,14 +4,14 @@
 <script src="/static/bc/highcharts/highstock.js"></script>
 <script src="/static/bc/highcharts/highcharts.js"></script>
 -->
-<script src="/static/bc/highcharts/highstock.js"></script>
-<script src="/static/node_modules/gridstack/dist/gridstack-all.js"></script>
-<link href="/static/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet"/>
+<script src="/static/bc/highcharts/highstock.js/"></script>
+<script src="/static/node_modules/gridstack/dist/gridstack-all.js/"></script>
+<link href="/static/node_modules/gridstack/dist/gridstack.min.css/" rel="stylesheet"/>
 
-<script src="/static/stlviewer/three.js/build/three.min.js"></script>
-<script src="/static/stlviewer/three.js/examples/js/WebGL.js"></script>
-<script src="/static/stlviewer/three.js/examples/js/loaders/STLLoader.js"></script>
-<script src="/static/stlviewer/three.js/examples/js/controls/OrbitControls.js"></script>
+<script src="/static/stlviewer/three.js/build/three.min.js/"></script>
+<script src="/static/stlviewer/three.js/examples/js/WebGL.js/"></script>
+<script src="/static/stlviewer/three.js/examples/js/loaders/STLLoader.js/"></script>
+<script src="/static/stlviewer/three.js/examples/js/controls/OrbitControls.js/"></script>
 <script src="/static/stlviewer/js/stlviewer.js"></script>
 
 <style type="text/css">
@@ -84,7 +84,6 @@
 {% include "dash/panel_js.html" %}
 {% include "dash/dashboard_js.html" %}
 {% include "dash/configure.html" %}
-{% include "dash/gridstack.html" %}
 
 {% include "dash/top.html" %}
 <section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
@@ -119,6 +118,7 @@
 
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 <script>
+CALLWS_LOG_EVENTS = 0    
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 var grid_options = {
     wwidth: 10,
@@ -147,34 +147,7 @@ document.onmousedown = function (e) {
         console.log('grid_options.handle', e.altKey )
     }
 };
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-GRID_TEMPLATE=`
-<div class="gridcard-header" onclick="toggleSelectPanel(this)"> 
-    <span id=paneltitle class="gridcard-headertitle">Title</span>
-    <span style="float: right;"> 
-        <div class="dropdown">
-            <a href="#" style="color: #000000; text-decoration: none;" data-toggle="dropdown"> 
-                ...
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" >
-                <a class="dropdown-item" onclick='removeWidget(this)' >Remove</a>
-                <a class="dropdown-item" onclick="updatePanelContents(getParentGridItem(this))">Refresh</a>
-                <a class="dropdown-item" onclick="toggleconfig(this)">toggle Config</a>
-            </div>
-        </div>
-    </span>
-</div>
-<textarea id=config cols=10 rows=5 style="display:none;"></textarea>
 
-<div class="gridcard" >
-    <!-- iframe width="90%" height="90%" src="https://www.youtube.com/embed/DuSDVj9a4WM" 
-    frameborder="0" 
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-    allowfullscreen>
-    </iframe -->
-    -- STUFF -- 
-</div>
-`
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function toggleconfig(ele) {
     console.log(ele)
@@ -236,6 +209,12 @@ frames=[
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 window.onload=function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const db = urlParams.get('dash', '')
+
+    if ( db ) {
+        getDashboard(db, 1)
+    }
 } 
 
 $(document).ready(function() {

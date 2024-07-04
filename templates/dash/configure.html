@@ -1,6 +1,6 @@
 <style>
 .configure {
-    position: fixed;
+    position:fixed;
     bottom: 0;
     right: 0;
     width: 60%;
@@ -10,7 +10,9 @@
     border: 2px solid;
     border: 1px solid #ececec;
     display: none1;
-    padding: 0px;}
+    padding: 0px;
+    float: right;
+}
 
 .c100 {
     width: 100%;
@@ -40,11 +42,16 @@
 {% include "dash/data_cache.html" %}
 {% include "dash/plots.html" %}
 
-<div id="configure" class="configure  fcontainer" >
+
+
+<div id="configure" class="configure  fcontainer" resizable draggable>
     <div class="header" style="background: #ececec; padding: 0 5 10 15;" >
         <br/>
         <h3 style="display: inline;"> Configure Dashboard <i style="font-size:24px" class="fa">&#xf080;</i> </h3>
-        <div style="float: right; display: inline;" onclick="toggleConfigureWindow()"> X </div>
+        <div style="float: right; display: inline;" > 
+            <a  onclick="switchLR()" > <i class="fas fa-toggle-off"></i>S </a> &nbsp; &nbsp;
+            <a  onclick="toggleConfigureWindow()">  X </a>  &nbsp;
+        </div>
     </div>
 
 <!-- ~~~~~~~~~~~~~~~~~~~~~ -->
@@ -123,7 +130,7 @@ dataui:{
             <div id="tabs1" >   
                 <textarea class="texta" style="height:90%;" rows=6 id="gridparms"  placeholder="">{
     title: '&nbsp;',
-    action: 'chart|3D|html|url',
+    action: 'chart|3D|html|url|showdata',
     refresh: 0,         
     chart_opts: {
         action: 'plot3', 
@@ -173,13 +180,42 @@ dataui:{
 function toggleConfigureWindow() {
     $('#configure').toggle()
 }
+function switchLR() {
+    var l = $('#configure').css('left')
+    //var r = $('#configure').css('right')
+    if ( l === "0" || l === 0 || l === "0px")
+        $('#configure').css('left', '')
+    else
+        $('#configure').css('left', 0)
+}
+function keytab(e) {
+    if (e.keyCode == 9) {
+        var t = e.target
+        t.setRangeText("\t", t.selectionStart, t.selectionEnd, 'end')
+        return false
+    }
+}
+x = document.getElementsByClassName("texta");
+for (var i = 0; i < x.length; i++) {
+    $(x[i])[0].onkeydown = keytab
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function highChartMode() {
+
+    var gridItems = GRID.getGridItems()
+
+    for (var g in gridItems) {
+        var grid = gridItems[g]
+        var content = $(grid).find(".gridcard")
+    }
+}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function getCleanPanelCfg() {
     var ncfg =  $('#gridparms').val().trim()
     eval("var cfg= "+ ncfg)
     delete cfg.stlfile
     delete cfg.data
-    delete cfg.dataui
+    delete cfg.datauio
     delete cfg.url
     delete cfg.html
     return cfg
@@ -259,7 +295,7 @@ function updatePanelContents(panel) {
     }
     //Set up resource here => data_cache.html
     if (jcfg.data) {
-        jcfg.panel = panel
+        //jcfg.panel = panel
         GET_DATA_CACHE(jcfg.data, panel )
 
         for (var d in jcfg.data ){
@@ -294,7 +330,7 @@ function processWindowURL() {
 }
 function tabsByName(id='#tabledatest #tabs', name="#tabs1") {
     var index = $(`${id} a[href="${name}"]`).parent().index();
-    console.log(id, name, index)
+    //console.log(id, name, index)
     $(id).tabs('option', 'active', index);
 }
 

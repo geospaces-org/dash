@@ -1,6 +1,4 @@
-<style>
-</style>
-<div class="resizable" id="chartcontainer" style="background-color: snow;"> </div>
+<div  id="chartcontainer" style="background-color: snow;"> </div>
 {% include "multicharts.html" %}
 {% include "multicharts1.html" %}
 {% include "dash/plots1_new.html" %}
@@ -122,19 +120,22 @@ function showPlot2(ds, panel, ctx, height='160px', onechart=0, clk=null, dclk=nu
     var chart = Highcharts.chart($(panel)[0], hopts);
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function charts(cfg, panel){
+function charts(cfg, panel, first_time=0){
     var ccfg   = cfg.chart_opts || {}
     var action = ccfg.action || 'showtable'
 
     action = action.split("|")[0]
     var card = $(panel).find(".gridcard")
 
-    var ctx  = cfg.data[0]
-    var name = (typeof(ctx) == 'string') ? ctx: (ctx.name || ctx.data_src )
-    var dscfg = DATA_CACHE[name]
-    var ds = dscfg.data
 
-    console.log("==> ACTION", action)
+    var ds = null
+    if ( cfg.data.length > 0) {
+        var ctx  = cfg.data[0]
+        var name = (typeof(ctx) == 'string') ? ctx: (ctx.name || ctx.data_src )
+        var dscfg = DATA_CACHE[name]
+        var ds = dscfg.data
+    }
+    //console.log("==> ACTION", action)
     switch (action) {
         case 'plot':
             showStockChart(ds, card, cfg)
@@ -146,20 +147,7 @@ function charts(cfg, panel){
             showPlot2(ds, card, cfg)
             break;
         case 'plot3':
-            showPlot3(ds, card, cfg)
-            break;
-
-        case 'showdata':
-        default:
-            var div = $(card)[0]
-            $(card).html('')
-            showDataTable(ds, 
-                    {   div: div, 
-                        id: 'paneltabledd1', 
-                        maxitems: 5000, 
-                        fillHeight:0,
-                        tableclass: "none"
-                    })
+            showPlot3(ds, card, cfg, first_time)
             break;
     }
 }
