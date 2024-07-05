@@ -1,13 +1,14 @@
 
+
 <script src="/static/bc/highcharts/modules/exporting.js"></script>
 <script src="/static/bc/highcharts/modules/export-data.js"></script>
 <script src="/static/bc/highcharts/modules/parallel-coordinates.js"></script>
 <script src="/static/bc/highcharts/modules/accessibility.js"></script>
 <script src="/static/bc/highcharts/modules/data.js"></script>
 <script src="/static/bc/highcharts/modules/drilldown.js"></script>
-<link  href="/static/bc/highcharts/dashboards/css/dashboards.css" rel="stylesheet"/>
 
 {% include "multicharts2.html" %}
+{% include "dash/plot_map.html" %}
 
 <script>
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,7 +70,7 @@ function getRandomData(n=10, data1=[]) {
 }
 var BARDATA= null
 function _barChart( ds, ctx={}, panel="#chart2", first_time=1){
-    var data1 = getRandomData(10)
+    var data1 = getRandomData(30)
 
     if ( !BARDATA) {
         BARDATA = data1
@@ -211,6 +212,102 @@ function _lineChart( ds, ctx={}, panel="#chart3", first_time=1 ){
         }
     }
 }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// This will return array with date/time, value ex: [ [12-02-02T01:01:01, 3.567], [...], ...]
+function _mapChartHC( ds, ctx={}, panel="#chart2", first_time=1){
+
+    var mapOpts =  {
+        credits:       {  enabled: false       },
+        chart:         {  margin: 0  },
+        title:         {  text: ''   },
+        navigation:    {  buttonOptions: { align: 'left', theme: { stroke: '#e6e6e6' }} },
+        mapNavigation: {  enabled: true, buttonOptions: { alignTo: 'spacingBox'  }},
+        mapView:       {  center: [10.73028454146517, 59.91261204279989],   zoom: 16    },
+
+        tooltip: {  pointFormat: '{point.name}'   },
+        legend: {
+            enabled: true,    title: { text: '' }, float: true,
+            align: 'left',
+            symbolWidth: 20,  symbolHeight: 20,
+            itemStyle: { textOutline: '1 1 1px rgba(255,255,255)'     },
+            backgroundColor: 'rgba(255,255,255,0.6)',
+            borderColor: '#e6e6e6',
+            itemMarginBottom: 0
+        },
+
+        plotOptions: { mappoint: {dataLabels: {   enabled: false  }  }   },
+
+        series: [
+                    {   type: 'tiledwebmap', showInLegend: false,  name: 'Basemap Tiles',
+                        provider: {  type: 'OpenStreetMap'  }, 
+                    },
+
+                    {   type: 'mappoint',  name: 'car1',  
+                        marker: { width: 24,  height: 24  },
+                        data: [
+                            { name: 'l1', lon: 10.69299,  lat: 59.90199  }, 
+                            { name: 'l1', lon: 10.69299,  lat: 59.90199  }, 
+                        ]
+                    }, 
+                    {   type: 'mappoint', name: 'car2',
+                        marker: { width: 24, height: 24    },
+                        data: [ 
+                            { name: 'yoga', lon: 10.70514, lat: 59.92448 }, 
+                            { name: 'gym' , lon: 10.70347, lat: 59.92645 }, 
+                        ]
+                    }
+                ]
+    }
+
+    //console.log(" MAP MAP _-----")
+    var myConfig = {
+        mapView: {  center: [-104.937696, 39.519818 ],   zoom: 16    },
+        events: {
+            mousemove: (e) => {consoel.log(e)}
+        }
+    }
+    const mapOptsNew = { ...mapOpts,   ...myConfig  }
+
+    var mydata1 = [
+            { name: "0", lat: 39.5198305, lon: -104.9375456  }, 
+            { name: "1", lat: 39.5184029, lon: -104.9396456  }, 
+            { name: "2", lat: 39.5175753, lon: -104.9397922  }, 
+    ]
+
+    //39.5198305,-104.9375456/39.5175753,-104.9397922/@39.5184029,-104.9399056,17.72
+
+    var nd = mydata1[0]
+    for (var i=3; i < 3; i++) {
+        //nd.name = "_" + i
+        //nd.lat = nd.lat - 0.000019
+        nd.lon = nd.lon + 0.0001
+        mydata1.push( structuredClone(nd))
+    }
+
+    mapOptsNew.series[1].data = mydata1
+
+    MAPCHART = Highcharts.mapChart( $(panel)[0], mapOptsNew)
+}
+var MAPCHART
+var STOPUPDATE=20
+var POINT1 =   { name: "0", lat: 39.5198305, lon: -104.9375456  }
+var POINT2 =   { name: "0", lat: 39.5175753, lon: -104.9397922  }
+var POINT1  =  { name: "0", lat: 39.5198305, lon: -104.9375456  }
+function randUpdate(up=500) {
+    if ( !MAPCHART)
+        return
+
+    POINT1.lat -= 0.0001
+    POINT1.lon += ( POINT2.lon - POINT1.lon )/ 20
+
+    console.log(`UPDATING ${POINT1} ${up}`)
+    MAPCHART.series[1].data[0].update(POINT1)
+
+    if (STOPUPDATE) {
+        setTimeout(randUpdate, up)
+        STOPUPDATE--
+    }
+}
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function showPlot3(ds, panel, ctx, first_time=0) {
     var opts = ctx.chart_opts || {};
@@ -226,6 +323,12 @@ function showPlot3(ds, panel, ctx, first_time=0) {
                 break;
         case 'bar':  
                 _barChart(ds, ctx, panel,first_time)
+                break;
+        case 'map':  
+                _mapChart(ds, ctx, panel,first_time)
+                break;
+        case 'maphc':  
+                _mapChartHC(ds, ctx, panel,first_time)
                 break;
         default:
                 _lineChart(ds, ctx, panel, first_time)

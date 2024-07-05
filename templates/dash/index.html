@@ -1,10 +1,14 @@
 {% extends "common.html" %}
 {% block content %}
+
+
 <!--
 <script src="/static/bc/highcharts/highstock.js"></script>
 <script src="/static/bc/highcharts/highcharts.js"></script>
+<script src="/static/bc/highcharts/highmaps.js"></script>
 -->
-<script src="/static/bc/highcharts/highstock.js/"></script>
+<script src="/static/bc/highcharts/highmaps.js"></script>
+<script src="/static/bc/highcharts/tiledwebmap.js"></script>
 <script src="/static/node_modules/gridstack/dist/gridstack-all.js/"></script>
 <link href="/static/node_modules/gridstack/dist/gridstack.min.css/" rel="stylesheet"/>
 
@@ -86,7 +90,7 @@
 {% include "dash/configure.html" %}
 
 {% include "dash/top.html" %}
-<section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
+<section id="content" style="padding: 0 0 0 0;height: 92vh; overflow: auto;" >
 <div class="grid-stack">
     <!--
 

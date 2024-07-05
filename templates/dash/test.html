@@ -1,6 +1,16 @@
 {% extends "common.html" %}
 {% block content %}
 
+<script src="/static/bc/highcharts/tiledwebmap.js"></script>
+<script src="/static/node_modules/gridstack/dist/gridstack-all.js/"></script>
+<link href="/static/node_modules/gridstack/dist/gridstack.min.css/" rel="stylesheet"/>
+
+<script src="/static/stlviewer/three.js/build/three.min.js/"></script>
+<script src="/static/stlviewer/three.js/examples/js/WebGL.js/"></script>
+<script src="/static/stlviewer/three.js/examples/js/loaders/STLLoader.js/"></script>
+<script src="/static/stlviewer/three.js/examples/js/controls/OrbitControls.js/"></script>
+<script src="/static/stlviewer/js/stlviewer.js"></script>
+
 <script src="/static/bc/highcharts/highstock.js"></script>
 <script src="/static/bc/highcharts/modules/exporting.js"></script>
 <script src="/static/bc/highcharts/modules/export-data.js"></script>
@@ -8,6 +18,7 @@
 <script src="/static/bc/highcharts/modules/accessibility.js"></script>
 <script src="/static/bc/highcharts/modules/data.js"></script>
 <script src="/static/bc/highcharts/modules/drilldown.js"></script>
+
 
 {% include "multicharts2.html" %}
 
@@ -37,16 +48,27 @@
 
 </style>
 <section id="content" style="padding: 0 0 0 0;height: 93vh; overflow: auto;" >
+      
 <div style="text-align: right;">
-    <button  class="btn btn-info btn-lg" type="button" onclick="_testGetData()" >Test1 </button>
+    <button  class="btn btn-info btn-lg" type="button" onclick="_mapChart()" >Test1 </button>
     <button  class="btn btn-info btn-lg" type="button" onclick="_testGetData1()">Test2 </button>
     <button  class="btn btn-info btn-lg" type="button" onclick="_testGetData3()">Test3 </button>
 </div>
 <hr/>
-<div class="divcontent div100 resizable"><div id=chart1 class="vw100"></div></div><hr/>
-<div class="divcontent div100 resizable"><div id=chart2 class="vw100"></div></div><hr/>
-<div class="divcontent div33  resizable"><div id=chart3 class="vw100"></div></div>
-<div class="divcontent div66  resizable"><div id=chart4 class="vw100"></div></div>
+
+{% include "dash/plot_map.html" %}
+
+<div class="divcontent div100 resizable">
+    
+    <div id=chart1 class="vw100">
+        <div style="position:absolute; width:100%; height:100%;padding:0; margin: 0;"" id="mapdiv">
+            </div>
+
+    </div>
+</div>
+<hr/>
+
+
 
 <figure class="highcharts-figure">
     <div id="container"></div>
@@ -184,6 +206,7 @@ function _testGetData3(source="default/a1.csv", panel="#chart3"){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 window.onload=function() {} 
 $(document).ready(function() {
+    _mapChart()
 })
 
 

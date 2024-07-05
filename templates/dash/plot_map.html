@@ -1,0 +1,92 @@
+<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+<style>
+    .olControlAttribution{
+        display: none;
+    }
+</style>
+    
+<script>
+ //Event listener for clicks
+OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
+    initialize: function (options) {
+        this.handlerOptions = OpenLayers.Util.extend(
+            {}, this.defaultHandlerOptions
+        );
+        OpenLayers.Control.prototype.initialize.apply(
+            this, arguments
+        );
+        this.handler = new OpenLayers.Handler.Click(
+            this, {
+            'click': this.trigger,
+            'rightclick': this.rightClick,
+
+        },
+            this.handlerOptions
+        );
+    },
+});
+//Constructing the maps
+var map;
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function _mapChart( ds, ctx={}, panel="#mapdiv", first_time=1){
+    coords = `
+<div  id="mapdiv" style="width:100%; height:100%;padding:0; margin: 0; background-color: #fff;">
+<div id="coords" style="position: absolute; top:2; right:100 ; height: 2em; font-size: smaller;">
+</div>
+</div>
+`
+    $(panel).html(coords)
+    map = new OpenLayers.Map({ div: $("#mapdiv")[0], units: 'm' });
+    var mapnik = new OpenLayers.Layer.OSM();
+    mapnik.opacity = 0.5;  // Make background transparent
+    map.addLayer(mapnik);
+    
+    map.events.register("click", map, function (e) {
+        var position = this.events.getMousePosition(e);
+        var p = map.getLonLatFromPixel(position);
+        position = p.transform(map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326"));
+        position.lat = Number(position.lat);
+        position.lon = Number(position.lon);
+    });
+
+    var click = new OpenLayers.Control.Click();
+    map.addControl(click);
+    click.activate();
+
+    //BELOW: Map Mouse Position
+    map.addControl(
+        new OpenLayers.Control.MousePosition({
+            autoActivate: false,
+            prefix: 'coordinates: ',
+            separator: ' | ',
+            numDigits: 2,
+            projection: 'EPSG:4326',
+            emptyString: 'Mouse is not over map.'
+        })
+    );
+    map.events.register("mousemove", map, function (e) {
+        var position = this.events.getMousePosition(e);
+
+        position = map.getLonLatFromPixel(position).transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+        position.lat = Number(position.lat).toFixed(4);
+        position.lon = Number(position.lon).toFixed(4);
+        var od = OpenLayers.Util.getElement("coords")
+        if (od) od.innerHTML = position;
+    });
+
+   //Code below is used for the vectorLayer (This determines labels/colors/sizes and such for the point.
+   var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+   renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
+
+
+   map.addLayers([mapnik]);
+   //Code below is used for the marker object (The red marker you can see on HWY 12).
+   var lonlat = new OpenLayers.LonLat(-104.937696, 39.519818) .transform(
+           new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984 //converting from map x,y coordinates to lonlat coordinates.
+           new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator //converting from map x,y coordinates to lonlat coordinates.
+   );
+   //
+   map.setCenter(lonlat, 16);
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+</script>
