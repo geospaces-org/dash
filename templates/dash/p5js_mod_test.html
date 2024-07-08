@@ -2,33 +2,20 @@
 {% block content %}
 <style>
 .p5js {
-    height: 400px !important;
-    width: 400px;
+    height: 100% !important;
+    width: 100%;
     background-color: black;
 
 }
 </style>
 <script src="/static/p5/p5.js"></script>
 <script src="/static/p5/addons/p5.easycam.js"></script>
-<script src="/static/p5/addons/p5.sound.js"></script>
 
 <div id="p5js" class="p5js" ></div>
 
 <script>
 $(document).ready(function () {
 })
-var easycam;
-
-function setup() {
-    var canvas = createCanvas(300, 300, WEBGL);
-    canvas.parent($('#p5js')[0]);
-
-    setAttributes('antialias', true);
-
-    easycam = createEasyCam({ distance: 300 });
-    document.oncontextmenu = function () { return false; }
-    document.onmousedown = function () { return false; }
-}
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
@@ -36,22 +23,103 @@ function windowResized() {
     background(32);
 }
 
+var easycam;
+
+let TEST_IMAGE
+let EARTH_IMAGE= null
+let orion_MODEL= null
+let font 
+function preload() {
+    TEST_IMAGE = loadImage('/static/texture/sat_orion.jpg');
+    EARTH_IMAGE= loadImage('/static/texture/earth.jpg');
+    orion_MODEL= loadModel('/static/texture/juno.stl', true);
+    font = loadFont("/static/texture/font1.ttf");
+
+}
+
+function setup() {
+    var div = $('#p5js')
+    var canvas = createCanvas(div.innerWidth(), div.innerHeight(), WEBGL);
+    canvas.parent(div[0])
+    canvas.elt.oncontextmenu = () => false;
+
+    textFont(font)
+    setAttributes('antialias', true);
+
+    easycam = createEasyCam({ distance: 300 });
+    document.oncontextmenu = function () { return false; }
+    document.onmousedown   = function () { return false; }
+    document.mousePressed  = function () { return false; }
+}
+
+
 function draw() {
-    perspective(60 * PI / 180, width / height, 1, 5000);
     background(32);
 
-    strokeWeight(0.5);
-    stroke(0);
+    textSize(5)
+    text("X: (30,0,0)", 30,0,0);
+    text("X: (-60,0,0)", -60,0,0);
 
-    push();
-    translate(50, 50, 0); fill(255); box(50, 50, 25); pop();
-    push();
-    translate(-50, -50, 0); fill(255, 0, 128); box(50, 50, 25); pop();
-    push();
-    translate(+50, -50, 0); fill(0, 128, 255); box(50, 50, 25); pop();
-    push();
-    translate(-50, +50, 0); fill(255, 255, 0); box(50, 50, 25); pop();
+    text("Y: (0,30,0)", 0,30,0);
+    text("Y: (0,-60,0)", 0,-60,0);
+
+    text("Z: (0,0,30)",  0,0,30);
+    text("Z: (0,0,-30)", 0,0,-30);
+
+
+    strokeWeight(1);
+    stroke("red");
+    fill("yellow")
+    circle(0,0,20)
+
+    strokeWeight(0.5);
+    stroke("red");
+    var l = 100
+    line(-l,0,0,l,0,0)
+    stroke("green");
+    line(0,-l,0,0,l,0)
+    stroke("blue");
+    line(0,0,-l,0,0,l)
+
+
+
+    push() 
+    {
+        drawSat( v)
+    }
+    pop()
+
+    //noLoop()
 }
+
+// Translate Examples :
+var v = p5.Vector.random3D();
+v.x = 50; v.y = 50; v.z = -50; v.angle = 0.01
+
+function drawSat(v) {
+    var x = 10
+    let v2 = createVector(1, 0, 0);
+    let p = v.cross(v2);
+    if (p.x != 0 || p.y != 0 || p.z != 0) {
+        rotate(v.angle, p);
+        v.angle += 0.01
+        //console.log(v.angle)
+    }
+    translate(v.x, v.y, v.z);
+    box(x, 2*x, 3*x, 0, 0, 0)
+    /*
+    push()
+        stroke("white")
+        translate(-x, -x, -x);
+        box(x/2, x*2/2, x*3/2 )
+    pop()
+    push()
+        translate(x, x, x);
+        box(x/2, x*2/2, x*3/2 )
+    pop()
+    */
+}
+
 </script>
 
 {% endblock %}
