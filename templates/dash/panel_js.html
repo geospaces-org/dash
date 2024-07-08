@@ -1,3 +1,4 @@
+{% include "dash/p5js.html" %}
 <script>
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     This file is included in the index.html file.
@@ -73,6 +74,9 @@ function refreshPanelContents(ele, first_time=1) {
             break;
         case "chart": 
                 charts(jcfg, ele, first_time)
+                break;
+        case "p5js": 
+                p5jsDisplay(jcfg, ele, first_time)
                 break;
         case 'showdata':
             $(content).html('')

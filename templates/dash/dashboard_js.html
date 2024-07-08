@@ -92,7 +92,7 @@ GRID_TEMPLATE=`
 `
 var last=1
 //function addWidget(title=last, content=" ", x=(last++%2)*6, y=last%3, w=5, h=3) {
-function addWidget(title=last++, content=" ", x=0, y=0, w=5, h=3) {
+function addWidget(title=last++, content=" ", x=0, y=0, w=5, h=5) {
     var html = GRID_TEMPLATE; 
     html=html.replace('Title', title || " "); 
     
@@ -127,8 +127,11 @@ function loadDashboardCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
     $('#saved_dashboard').val(responseTxt)
     GRID.removeAll()
     loadDashboard(responseTxt)
-    if ( ctx.hide) {
-        setTimeout(toggleConfigureWindow, "$('#configure').hide()")
+    if ( ctx.hide && GRID.getGridItems().length > 0) {
+        //setTimeout(toggleConfigureWindow, "$('#configure').hide()")
+        toggleSelectPanel(GRID.getGridItems()[0] )  // not sure why I have to call it twice
+        toggleSelectPanel(GRID.getGridItems()[0] )  // calling once wont work
+        
     }
 }
 function getDashboard(name, hideConfigureWindow=0) {

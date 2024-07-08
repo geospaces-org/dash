@@ -1,0 +1,53 @@
+
+{% extends "common0.html" %}
+{% block content %}
+<style>
+    .p5js {
+        height: 100%;
+        width: 100%;
+        background-color: black;
+    }
+</style>
+<script src="/static/p5/p5.js"></script>
+<div id="p5js" class="p5js"></div>
+
+<script>
+$(document).ready(function () {
+})
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function setup() {
+    var div = $('#p5js')
+    var canvas = createCanvas(div.innerWidth(), div.innerHeight());
+    canvas.parent(div[0])
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function windowResized() {
+    //resizeCanvas(windowWidth, windowHeight);
+    //background(32);
+    //draw()
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function draw() {
+    background(237);
+    let colors= ['black', 'firebrick', 'red', 'purple', 'blue', 'orange', 'green',]
+    for (var angle = 0; angle <= 360 * 8; angle += 6) {
+        if (angle % 360 == 0) {
+            var c = random(colors)
+           stroke(c)
+        }
+        var center = [windowWidth/2, windowHeight/2]
+        var dim = Math.min(width, height /2 - 10)
+
+        var x1 = center[0] - dim * cos(angle)
+        var y1 = center[1] - dim * sin(angle)
+
+        var x2 = center[0] - 108 * cos(angle * 13 / 8)
+        var y2 = center[1] - 108 * sin(angle * 13 / 8)
+
+        line(x1, y1, x2, y2)
+        noLoop()
+    }
+}
+</script>
+
+{% endblock %}

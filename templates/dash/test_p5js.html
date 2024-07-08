@@ -1,0 +1,69 @@
+{% extends "common.html" %}
+{% block content %}
+<style>
+
+.pagecontent{
+    width: 100%; 
+    position: relative;
+    padding-left: 0px; 
+    overflow: auto;
+}    
+.p5js {
+    height: 400px !important;
+    width: 400px;
+    background-color: black;
+
+}
+</style>
+<script src="/static/p5/p5.js"></script>
+<script src="/static/p5/addons/p5.easycam.js"></script>
+<script src="/static/p5/addons/p5.sound.js"></script>
+
+<div id="p5js" class="p5js" >
+    l
+</div>
+<div >    HELLO</div>
+
+<script>
+$(document).ready(function() {
+})
+var easycam;
+
+function setup() {
+  var canvas = createCanvas(300, 300, WEBGL);
+  canvas.parent($('#p5js')[0]) ;
+  //canvas.parent('p5js');
+
+  setAttributes('antialias', true);
+
+  easycam = createEasyCam({  distance: 300 });
+
+  document.oncontextmenu = function() {  return false;  }
+  document.onmousedown = function()   {  return false;  }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  easycam.setViewport([0, 0, windowWidth, windowHeight]);
+  background(32);
+}
+
+function draw() {
+  perspective(60 * PI / 180, width / height, 1, 5000);
+  background(32);
+
+  strokeWeight(0.5);
+  stroke(0);
+
+  push();
+  translate(50, 50, 0);  fill(255);  box(50, 50, 25);  pop();
+  push();
+  translate(-50, -50, 0);  fill(255, 0, 128);  box(50, 50, 25);  pop();
+  push();
+  translate(+50, -50, 0);  fill(0, 128, 255);  box(50, 50, 25);  pop();
+  push();
+  translate(-50, +50, 0);  fill(255, 255, 0);  box(50, 50, 25);  pop();
+}
+</script>
+
+{% endblock %}

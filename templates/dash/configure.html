@@ -1,18 +1,22 @@
 <style>
 .configure {
-    position:fixed;
-    bottom: 0;
-    right: 0;
-    width: 60%;
-    height:100%;
-    background: rgba(255, 255, 255, 0.99);
+    position: absolute;
+    bottom: 4;
+    top: 0;
+    right: 4;
+    width: 50%;
+    height: 99%;
+    background: rgba(255, 255, 255, 0.8);
     z-index: 100;
     border: 2px solid;
-    border: 1px solid #ececec;
-    display: none1;
     padding: 0px;
+    background: rgba(255, 255, 255, 0.99);
+    border: 2px solid #666;
+    border-radius: 9px;
+    display: none1;
     float: right;
 }
+
 
 .c100 {
     width: 100%;
@@ -44,7 +48,7 @@
 
 
 
-<div id="configure" class="configure  fcontainer" resizable draggable>
+<div id="configure" class="configure  fcontainer  resizable" >
     <div class="header" style="background: #ececec; padding: 0 5 10 15;" >
         <br/>
         <h3 style="display: inline;"> Configure Dashboard <i style="font-size:24px" class="fa">&#xf080;</i> </h3>
@@ -69,36 +73,7 @@
 
             <!--  tabs3 Data  -->
             <div id="tabs3" >
-                <div class="fcontainer" >
-                    <div class="content" style="background: #7e8aa0;">
-                        <textarea class="texta" style="height: 100%; " rows=6 id="dataparams"  >{
-data: [
-    {
-        name    : 'data1',
-        data_src: 'default/a1.csv.cfg',
-        cols: "time, ALARM_TOTAL, C01_MV",
-        filter: '', 
-        refresh: 0,
-        nrows: 100, 
-    },
-    {
-        name    : 'data2',
-        url     : '/dash/sample_data/?n=1',
-        refresh : 5
-    }
-],
-dataui:{
-        action: 'showdata|plot|plot1|plot2',
-        data: ['data1', 'data2'],
-        opts: { height: '100%', onechart: 0, clk: null, dclk: null },
-        display_rows: 10
-    }
-}
-                    </textarea> 
-                </div>
-                <div class="footer" style="background: #7e8aa0;">
-                    <button  class="btn btn-primary" type="button" onclick="updateDATACFG()">Update Data</button>
-                </div>
+                <div >
                 </div>
             </div>
 
@@ -130,22 +105,19 @@ dataui:{
             <div id="tabs1" >   
                 <textarea class="texta" style="height:90%;" rows=6 id="gridparms"  placeholder="">{
     title: '&nbsp;',
-    action: 'chart|3D|html|url|showdata',
+    action: 'p5js|chart|3D|html|url|showdata',
     refresh: 0,         
     chart_opts: {
         action: 'plot3', 
+    },
+    p5js: {
+        action: "drawSpace(p5); //drawPrettyCircles(p5)"
     },
     // stlfile: '/static/stlviewer/stls/hook.stl',
     // url: '',
     // html: `<img src="/static/imgs/stream.png" height="20%"/> <hr/>`,
     //
-    data: [
-        {
-            name    : 'data2',
-            url     : '/dashboard/sample_data/?n=1',
-            refresh : 0
-        }
-    ]
+    data: [ ]
 }
             </textarea> 
                 <button class="btn btn-primary btn-medium" type="button" onclick="setPanelContents()">Update Panel</button>

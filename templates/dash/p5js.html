@@ -1,0 +1,114 @@
+<script src="/static/p5/p5.min.js"></script>
+<script src="/static/p5/addons/p5.easycam.js"></script>
+{% include "dash/p5js_cel.html" %}
+
+<script>
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function myP5(p5) {
+    //console.log("<========= CALLED ", p5)
+    
+    p5.getWH = function() {        
+        var div = p5._userNode
+        var w = $(div).innerWidth()-4
+        var h = $(div).innerHeight()-4
+        return [w,h, [w/2,h/2]]
+    }
+
+    p5.setup = function () {
+        var div = p5._userNode
+        var cfg = $(div).data('cfg')
+        var w = $(div).innerWidth()-4
+        var h = $(div).innerHeight()-4
+
+        //console.log("<========= SETUP ",w,h, p5)
+        //var canvas = (cfg.p5js['3D']) ? p5.createCanvas(w, h, p5.WEBGL) : p5.createCanvas(w, h)
+        var canvas = p5.createCanvas(w, h, p5.WEBGL) 
+        //canvas.parent($(div)[0])
+        p5.background(235);
+        p5.noStroke();
+
+        var func= (cfg.p5js) ? cfg.p5js.action : "drawPrettyCircles(p5)"
+        if ( typeof(func) === 'string' ) {
+            if ( !func.indexOf("(") >=0 ){
+                func = eval(func)
+                if ( typeof(func) === 'function'){
+                    func(p5, setup='setup')
+                }
+            }
+        }
+    }
+
+    p5.draw = function () {
+        var div = p5._userNode
+        var cfg = $(div).data('cfg')
+        var func= (cfg.p5js) ? cfg.p5js.action : "drawPrettyCircles(p5)"
+
+        //console.log("myP5:Draw ...", func, cfg.p5js)
+
+        if ( typeof(func) === 'string' ) {
+            if ( !func.indexOf("(") >=0 ){
+                func = eval(func)
+                if ( typeof(func) === 'function'){
+                    func(p5, setup='draw')
+                }
+            } else {
+                eval(func)
+            }
+        } else {
+            func(p5, 'draw') // draw
+        }
+
+        //p5._loop= (cfg.p5js) ? cfg.p5js.loop: 0;
+    }
+
+    p5.createEasyCam1 = function (p5) {
+        try{
+            return new Dw.EasyCam(arguments);
+        } catch(err){
+            console.log(err)
+        }
+    }
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function drawPrettyCircles(p5, setup='draw|setup') {
+    let colors= ['black', 'firebrick', 'red', 'purple', 'blue', 'orange', 'green',]
+    for (var angle = 0; angle <= 360 * 8; angle += 6) {
+        //console.log(p5.getWH())
+
+        if (angle % 360 == 0) {
+            var c = p5.random(colors)
+           p5.stroke(c)
+        }
+        var dim = p5.getWH()
+        var center = dim[2]
+        var dim = Math.min(dim[0], dim[1]) /2 - 10
+
+        var x1 = center[0] - dim * p5.cos(angle)
+        var y1 = center[1] - dim * p5.sin(angle)
+
+        var x2 = center[0] - 108 * p5.cos(angle * 13 / 8)
+        var y2 = center[1] - 108 * p5.sin(angle * 13 / 8)
+
+        p5.line(x1, y1, x2, y2)
+        p5._loop= 0
+    }
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function p5jsDisplay(jcfg, panel, first_time=0) {
+    // #1. Set the panel Title
+    var content = $(panel).find(".gridcard")
+    console.log("p5js ... fun ...")
+    $(content).html('')
+
+    if ( jcfg.p5js.url) {
+        // setup iframe and data 
+        var url = jcfg.p5js.url
+        var frm = `<iframe width=100% height=100% allowfullscreen src=${url}> </iframe>`
+        $(content).html(frm)
+    } else {
+        $(content).data('cfg' , jcfg)
+        new p5(myP5)
+    }
+}
+
+</script>

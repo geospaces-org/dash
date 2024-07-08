@@ -1,0 +1,144 @@
+
+<!-- https://planetpixelemporium.com/ -->
+{% extends "common0.html" %}
+{% block content %}
+<style>
+.pagecontent{
+    width: 100%; 
+    padding: 0px; 
+    overflow: auto;
+}
+.p5js {
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    padding: 0;
+    margin: 0;
+}
+</style>
+<script src="/static/p5/p5.js"></script>
+<script src="/static/p5/addons/p5.easycam.js"></script>
+<script src="/static/p5/addons/p5.sound.js"></script>
+
+<div id="p5js" class="p5js"></div>
+
+<script>
+$(document).ready(function () {
+})
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const textures = [];
+function preload() {
+    textures[0] = loadImage('/static/texture/sun.jpg');
+    textures[0] = loadImage('/static/texture/earth.jpg');
+    textures[2] = loadImage('/static/texture/mars.jpg');
+    textures[3] = loadImage('/static/texture/jupiter.jpg');
+}
+function setup() {
+    var div = $('#p5js')
+    console.log(div)
+    var canvas = createCanvas(div.innerWidth(), div.innerHeight(), WEBGL);
+    canvas.parent(div[0])
+    canvas.elt.oncontextmenu = () => false;
+
+    setAttributes('antialias', true);
+
+    easycam = createEasyCam({ distance: 300 });
+    document.oncontextmenu = function () { return false; }
+    document.onmousedown   = function () { return false; }
+    document.mousePressed  = function () { return false; }
+
+    EARTH = new Planet(30, 0, 0, textures[0], p5);
+    EARTH.spawnMoons(4, 4);
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    easycam.setViewport([0, 0, windowWidth, windowHeight]);
+    background(32);
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function draw() {
+    background(0);
+    ambientLight(255, 255, 255);
+    pointLight(255, 255, 255, 0, 0, 0);
+    EARTH.show();
+    EARTH.orbit();
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Solar System in Processing - Part 3 (3D textures)
+// The Coding Train / Daniel Shiffman
+// https://thecodingtrain.com/CodingChallenges/009-solarsystemgenerator3d-texture.html
+// https://youtu.be/FGAwi7wpU8c
+// https://editor.p5js.org/codingtrain/sketches/SD8a6k6A
+
+class Planet {
+    constructor(r, d, o, img) {
+        this.v = p5.Vector.random3D();
+
+        this.radius = r;
+        this.distance = d;
+        this.v.mult(this.distance);
+        this.angle = random(TWO_PI);
+        this.orbitspeed = o;
+
+        this.planets = null;
+
+        // Since there is no direct equivalent of PShape in p5.js, we have
+        // to save the texture for later use instead of creating a globe.
+        this.texture = img;
+    }
+
+    orbit() {
+        this.angle = this.angle + this.orbitspeed;
+        if (this.planets != null) {
+            for (let i = 0; i < this.planets.length; i++) {
+                this.planets[i].orbit();
+            }
+        }
+    }
+
+    spawnMoons(total, level) {
+        this.planets = [];
+        for (let i = 0; i < total; i++) {
+            let r = this.radius / (level * 2);
+            let d = random(this.radius + r, (this.radius + r) * 2);
+            let o = random(-0.1, 0.1);
+            let index = int(random(0, textures.length));
+            this.planets[i] = new Planet(r, d, o, textures[index]);
+            if (level < 2) {
+                let num = int(random(0, 3));
+                this.planets[i].spawnMoons(num, level + 1);
+            }
+        }
+    }
+
+    show() {
+        push();
+        noStroke();
+        let v2 = createVector(1, 0, 1);
+        let p = this.v.cross(v2);
+        // Rotation around a 0-length axis doesn't work in p5.js, so don't do that.
+        if (p.x != 0 || p.y != 0 || p.z != 0) {
+            rotate(this.angle, p);
+        }
+        stroke(255);
+        //line(0, 0, 0, this.v.x, this.v.y, this.v.z);
+        //line(0, 0, 0, p.x, p.y, p.z);
+
+        translate(this.v.x, this.v.y, this.v.z);
+        noStroke();
+        fill(255);
+        texture(this.texture);
+        sphere(this.radius);
+        if (this.planets != null) {
+            for (let i = 0; i < this.planets.length; i++) {
+                this.planets[i].show();
+            }
+        }
+        pop();
+    }
+}
+</script>
+
+{% endblock %}

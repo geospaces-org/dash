@@ -1,0 +1,139 @@
+<script>
+// Solar System in Processing - Part 3 (3D textures)
+// The Coding Train / Daniel Shiffman
+// https://thecodingtrain.com/CodingChallenges/009-solarsystemgenerator3d-texture.html
+// https://youtu.be/FGAwi7wpU8c
+// https://editor.p5js.org/codingtrain/sketches/SD8a6k6A
+
+function random3D(p5) {
+  const angle = Math.random() * 2 * Math.PI;
+  const vz = Math.random() * 2 - 1;
+  const vzBase = Math.sqrt(1 - vz * vz);
+  const vx = vzBase * Math.cos(angle);
+  const vy = vzBase * Math.sin(angle);
+  return new p5.createVector(vx, vy, vz);
+}
+
+class Planet {
+    constructor(r, d, o, img, p5) {
+        this.p5 = p5 
+        this.v = p5.createVector()
+        this.v = random3D(p5)
+        
+        this.radius = r;
+        this.distance = d;
+        this.v.mult(this.distance);
+        this.angle = p5.random(p5.TWO_PI);
+        this.orbitspeed = o;
+
+        this.planets = null;
+
+        // Since there is no direct equivalent of PShape in p5.js, we have
+        // to save the texture for later use instead of creating a globe.
+        this.texture = img;
+    }
+
+    spawnMoons(total, level) {
+        this.planets = [];
+        p5 = this.p5
+        for (let i = 0; i < total; i++) {
+            let r = this.radius / (level * 2);
+            let d = p5.random( (this.radius + r) * 1.5 , (this.radius + r) * 3);
+            let o = p5.random(-0.1, 0.1);
+            let index = p5.int( p5.random(0, textures.length));
+            this.planets[i] = new Planet(r, d, o, textures[index], p5);
+            if (level < 2) {
+                let num = int( p5.random(0, 3));
+                this.planets[i].spawnMoons(num, level + 1);
+            }
+        }
+    }
+
+    orbit() {
+        this.angle = this.angle + this.orbitspeed;
+        if (this.planets != null) {
+            for (let i = 0; i < this.planets.length; i++) {
+                this.planets[i].orbit();
+            }
+        }
+    }
+
+    show(p5) {
+        //console.log(`<======== Show: `, )
+        p5 = p5 || this.p5
+        p5.push();
+        p5.noStroke();
+        let v2 = p5.createVector(1, 0, 1);
+        let p = this.v.cross(v2);
+        // Rotation around a 0-length axis doesn't work in p5.js, so don't do that.
+        if (p.x != 0 || p.y != 0 || p.z != 0) {
+            p5.rotate(this.angle, p);
+        }
+        p5.stroke(255);
+        //line(0, 0, 0, this.v.x, this.v.y, this.v.z);
+        //line(0, 0, 0, p.x, p.y, p.z);
+
+        p5.translate(this.v.x, this.v.y, this.v.z);
+        p5.noStroke();
+        p5.fill(255);
+        // Since we don't have a PShape, we draw a textured sphere instead.
+        p5.texture(this.texture);
+        p5.sphere(this.radius);
+        //ellipse(0, 0, this.radius * 2, this.radius * 2);
+        if (this.planets != null) {
+            for (let i = 0; i < this.planets.length; i++) {
+                this.planets[i].show();
+            }
+        }
+        p5.pop();
+    }
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const textures = [];
+function preload(p5) {
+  textures[0] = p5.loadImage('/static/texture/earth.jpg');
+  textures[1] = p5.loadImage('/static/texture/mars.jpg');
+  textures[2] = p5.loadImage('/static/texture/jupiter.jpg');
+}
+
+function mousePressed() {
+    console.log("Mouse pressed")
+    EARTH.show()
+
+}
+function show(p5) {
+    //p5 = p5 || this.p5
+    //p5.background(0);
+    EARTH.orbit()
+    EARTH.show()
+    //setTimeout(show, 1000)
+}
+let EARTH = null
+let CAM = null
+function drawSpace(p5, func) {
+    console.log(`<======== Drawspace: ${func} `, )
+    if ( func && func.startsWith("set")) {
+        p5.background(0);
+        p5.lights();
+        preload(p5) 
+        EARTH = new Planet(30, 0, 0, textures[0], p5 );
+        EARTH.spawnMoons(4, 4);
+        p5.mousePressed = mousePressed
+        try{
+            p5.createEasyCam();
+        } catch(err){
+            console.log(err)
+        }
+
+        return
+    }
+    //p5.frameRate(5);
+    //p5.background(0);
+    p5.ambientLight(255, 255, 255);
+    p5.pointLight(255, 255, 255, 0, 0, 0);
+    //p5.sphere(20);
+    p5._loop = false
+    setTimeout(show, 1000, p5)
+}
+
+</script>

@@ -235,7 +235,7 @@ function _mapChartHC( ds, ctx={}, panel="#chart2", first_time=1){
             itemMarginBottom: 0
         },
 
-        plotOptions: { mappoint: {dataLabels: {   enabled: false  }  }   },
+        plotOptions: { mappoint: {dataLabels: {   enabled: false  }  },   enableMouseTracking: true,    },
 
         series: [
                     {   type: 'tiledwebmap', showInLegend: false,  name: 'Basemap Tiles',
