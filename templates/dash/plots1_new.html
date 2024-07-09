@@ -46,7 +46,7 @@ function _parallelAxisChart( ds, ctx={}, panel="#chart2", first_time=1){
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // This will return array with date/time, value ex: [ [12-02-02T01:01:01, 3.567], [...], ...]
 function _pieChart( ds, ctx={}, panel="#chart2", first_time=1){
-    data =  [{
+    series =  [{
             name: 'Percentage', colorByPoint: true,
             data: [   
                 { name: 'Water',   y: 55.02  },
@@ -57,7 +57,7 @@ function _pieChart( ds, ctx={}, panel="#chart2", first_time=1){
             ]
     }]
     // parse the data to match above :)
-    copts = _getChart({type: 'pie', title: ctx.title || 'pie', data: data})
+    copts = _getChart({type: 'pie', title: ctx.title || 'pie', data: series})
     var chart = Highcharts.chart($(panel)[0], copts);
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -106,7 +106,7 @@ function _barChart( ds, ctx={}, panel="#chart2", first_time=1){
         series: [{
                     name: 'Random ',
                     data: data1,
-                    dataLabels: {  enabled: true,    },
+                    dataLabels: {  enabled: false,    },
                     tooltip: {  pointFormat: 'Y: {point.y}/h</b><br> <b>€ z: {point.z} million</b><br>'    },
                     borderRadius: 3,
                     colorByPoint: false,
@@ -171,7 +171,16 @@ function _lineChart( ds, ctx={}, panel="#chart3", first_time=1 ){
             }
             var nd = _getDataToPlot(ds, idx)
             //sr.setData(nd)
-            sr.addPoint(nd[nd.length-1], true, true)
+            var ldata = nd[nd.length-1]
+            var sdata = sr.data[sr.data.length-1]
+
+            if ( ldata[0] > sdata.x) {
+                //console.log( col, " <==adding data ", ldata, sdata.x)
+                sr.addPoint(nd[nd.length-1], true, true)
+            } else{
+                //console.log( col, " <==No New data ", ldata, sdata.x)
+            }
+            //break
         }
         return
     }
