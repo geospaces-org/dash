@@ -40,19 +40,31 @@
     box-shadow: 1px 1px 2px #000;
 }
 
+.gridcard-header-selected {
+   background-color: rgba(24, 24, 215, 0.09);
+}
+
+.gridcard-header-controls {
+    display: none;
+}
+
 .gridcard-header {
     cursor: move;
     width: 100%;
     padding: 1 10 1 10;
-    bbackground-color: rgba(0,0,0,.09);
+    min-height: 30px;
 }
 .gridcard-header:hover {
     background-color: rgba(0,0,0,.09);
+    display: block;
 }
+
+
 .gridcard-headertitle {
     font-size: medium; 
     font-weight: bold;
 }
+
 
 .gridcard {
     text-align: left;
@@ -126,6 +138,9 @@ var grid_options = {
     wwidth: 10,
     hheight: 34,
     cellHeight: '70px',
+    cellHeight: 'auto', // see other possible values (best to do in here)
+    //cellHeightThrottle: 100,
+    //cellHeight: ($('.grid-stack').height()+18)/10,
     cellWidth: '20px',
     verticalMargin: 2,
     horizontalMargin: 0.0,
@@ -158,11 +173,15 @@ function toggleconfig(ele) {
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function toggleSelectPanel(ele) {
-    if (ACTIVE_GRID_ITEM)
+    if (ACTIVE_GRID_ITEM){
         ACTIVE_GRID_ITEM.classList.remove('grid-stack-item-selected')
+        var head = $(ACTIVE_GRID_ITEM).find(".gridcard-header")
+        head.removeClass("gridcard-header-selected")
+    }
 
-    if ( !ele )
+    if ( !ele ){
         ACTIVE_GRID_ITEM = GRID.getGridItems().pop()
+    }
     else {
         ele = getParentGridItem(ele)
         if ( ele == ACTIVE_GRID_ITEM)
@@ -172,6 +191,11 @@ function toggleSelectPanel(ele) {
     }
     if ( ACTIVE_GRID_ITEM) {
         ACTIVE_GRID_ITEM.classList.add('grid-stack-item-selected')
+        var head = $(ACTIVE_GRID_ITEM).find(".gridcard-header")
+        head.addClass("gridcard-header-selected")
+
+        //console.log(head)
+
         var titv = $(ACTIVE_GRID_ITEM).find("#paneltitle")
         //$('#configure').find('#title').val(titv.html())
         parms = $(ACTIVE_GRID_ITEM).find("#config").val()
