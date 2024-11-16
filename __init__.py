@@ -1,1 +1,2 @@
 import dash.dash_services
+import geoapp.analytics
